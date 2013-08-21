@@ -2,7 +2,7 @@
 
 <product productid="phpkd_vbsas" active="1">
 	<title>PHPKD - vB Spam Assassin</title>
-	<description><![CDATA[This product will disables registration form submit button fox X seconds to make sure current user is a human, not a spamming bot. Submit button can be left enabled as well, but registration rejected & info sent to staff.]]></description>
+	<description><![CDATA[This product adds completely new level of Spam protection to your forum, just by one click you can clean the mess & delete all content posted by any Spammer (threads, posts, pictures, ..etc), human registration timer also prevents Spam registrations.]]></description>
 	<version>4.2.100</version>
 	<url><![CDATA[http://www.vbulletin.org/forum/misc.php?do=producthelp&pid=phpkd_vbsas]]></url>
 	<versioncheckurl><![CDATA[http://www.vbulletin.org/forum/misc.php?do=productcheck&pid=phpkd_vbsas]]></versioncheckurl>
