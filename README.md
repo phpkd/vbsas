@@ -154,7 +154,7 @@ Technical Stats:
    * New FAQ Items: 0
    * New Help Topics: 0
    * New Style Variables: 0
-	   * --------------------------------
+	   * ---------------------------------
    * Installation Level: V.Easy
    * Installation Time: ~20 seconds
 
