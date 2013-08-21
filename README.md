@@ -70,7 +70,7 @@ Installation Procedure:
 		  - jquery
 			  - jquery-1.9.1.min.js
 	  - includes
-		  - class_dm_phpkd_vbsas
+		  - class_dm_phpkd_vbsas.php
 		  - xml
 			  - bitfield_phpkd_vbsas.xml
 
@@ -131,7 +131,7 @@ Help with:
 
 History:
 ---
-   * v4.2.100 06/05/2013 10:00 AM UTC: First initial 4.x.x public release.
+   * v4.2.100 01/08/2013 10:00 AM UTC: First initial 4.x.x public release.
 
 
 Technical Stats:
