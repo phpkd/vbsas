@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<bitfields product="phpkd_vbsas">
+	<bitfielddefs>
+		<group name="misc">
+			<group name="phpkd_vbsas_notify">
+				<bitfield name="phpkd_vbsas_pm"		>1</bitfield>
+				<bitfield name="phpkd_vbsas_email"	>2</bitfield>
+				<bitfield name="phpkd_vbsas_thread"	>4</bitfield>
+			</group>
+			<group name="phpkd_vbsas_banoptions">
+				<bitfield name="phpkd_vbsas_ip"		>1</bitfield>
+				<bitfield name="phpkd_vbsas_email"	>2</bitfield>
+			</group>
+		</group>
+	</bitfielddefs>
+</bitfields>
