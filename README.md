@@ -31,7 +31,7 @@ vBulletin Compatibility:
 
 Features:
 ---
-   |- General Features:-
+* General Features:-
 	* Fully Phrased.
 	* Fully Automated.
 	* Fully Supported.
@@ -45,7 +45,7 @@ Features:
 	* Registration human verification process depends on ellapsed time through the registration (compared to random time period chosen from a range determined via AdminCP).
 	* With just only one click, you can delete all traces of any spammer: (user will permanently deleted. This deletion process includes all posted of data: Threads, Posts, Attachments, Calendar Events, Albums, Pictures, Social Groups, Group Discussions, Group Pictures, Announcements, Private Messages, Blogs, Blog Posts, Blog Comments, Visitor Messages, and All Other Traces [Active Sessions, User Notes, Infractions, CP Logs, Group Memberships]), and optionaly (according to product's settings) Ban IP(s), Ban Email(s).)
 
-   |- Specific Features:-
+* Specific Features:-
 	* Active Switch
 	* Registration Human Verification Minimum Wait Time Period (seconds)
 	* Registration Human Verification Maximum Wait Time Period (seconds)
@@ -66,14 +66,14 @@ Features:
 Installation Procedure:
 ---
    1. Upload required files to their appropriate places:
-	clientscript
-	   jquery
-	      jquery-1.9.1.min.js
+	  - clientscript
+		  - jquery
+			  - jquery-1.9.1.min.js
 
-	includes
-	   class_dm_phpkd_vbsas
-	   xml
-	      bitfield_phpkd_vbsas.xml
+	  - includes
+		  - class_dm_phpkd_vbsas
+		  - xml
+			  - bitfield_phpkd_vbsas.xml
 
 
    2. Import product's XML "product-phpkd_vbsas.xml" file from AdminCP.
