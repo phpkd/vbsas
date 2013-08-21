@@ -1,0 +1,828 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<product productid="phpkd_vbsas" active="1">
+	<title>PHPKD - vB Spam Assassin</title>
+	<description><![CDATA[This product will disables registration form submit button fox X seconds to make sure current user is a human, not a spamming bot. Submit button can be left enabled as well, but registration rejected & info sent to staff.]]></description>
+	<version>4.2.100</version>
+	<url><![CDATA[http://www.vbulletin.org/forum/misc.php?do=producthelp&pid=phpkd_vbsas]]></url>
+	<versioncheckurl><![CDATA[http://www.vbulletin.org/forum/misc.php?do=productcheck&pid=phpkd_vbsas]]></versioncheckurl>
+	<dependencies>
+	</dependencies>
+	<codes>
+	</codes>
+	<templates>
+		<template name="phpkd_vbsas_confirm" templatetype="template" date="1377034560" username="PHPKD" version="4.2.100"><![CDATA[{vb:stylevar htmldoctype}
+<html xmlns="http://www.w3.org/1999/xhtml"<vb:if condition="$vboptions['enablefacebookconnect']"> xmlns:fb="http://www.facebook.com/2008/fbml"</vb:if> dir="{vb:stylevar textdirection}" lang="{vb:stylevar languagecode}" id="vbulletin_html"><head>
+	{vb:raw headinclude}
+
+	<title>{vb:rawphrase phpkd_vbsas_memberaction}</title>
+
+	{vb:cssfile editor.css}
+	<!--[if lt IE 8]>
+	{vb:cssfile editor-ie.css}
+	<![endif]-->
+	<script type="text/javascript" src="clientscript/vbulletin-editor.js?v={vb:raw vboptions.simpleversion}"></script>
+
+{vb:raw headinclude_bottom}
+</head>
+<body>
+{vb:raw header}
+
+{vb:raw navbar}
+
+<div id="pagetitle">
+	<h1>{vb:rawphrase phpkd_vbsas_memberaction}</h1>
+</div>
+
+
+<form action="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}misc.php" method="post" name="vbform" class="vbform block">
+
+	<h2 class="blockhead">{vb:rawphrase phpkd_vbsas_memberaction}</h2>
+	<div class="blockbody formcontrols">
+		<h3 class="blocksubhead">{vb:rawphrase phpkd_vbsas_desc}</h3>
+		<div class="section">
+
+            <div class="blockrow">
+                <label for="description">{vb:rawphrase phpkd_vbsas_userinfo_title}:</label>
+                <p class="description" id="description">
+                    {vb:rawphrase phpkd_vbsas_userinfo_desc, {vb:raw phpkd_vbsas.username}, {vb:raw phpkd_vbsas.userid}, {vb:raw phpkd_vbsas.email}, {vb:raw phpkd_vbsas.ipaddress}}
+                </p>
+            </div>
+
+			<div class="blockrow">
+				<label>{vb:rawphrase phpkd_vbsas_memberaction}:</label>
+                <ul class="checkradio group dep_group rightcol">
+					<li>
+              			<label for="deleteconfirm"><input type="checkbox" name="deleteconfirm" value="1" id="deleteconfirm" tabindex="1" /> {vb:rawphrase phpkd_vbsas_deleteconfirm_title}</label>
+					</li>
+				</ul>
+				<p class="description">
+					{vb:rawphrase phpkd_vbsas_deleteconfirm_desc}
+				</p>
+			</div>
+
+			<div class="blockrow">
+				<label>{vb:rawphrase phpkd_vbsas_options}:</label>
+                <ul class="checkradio group dep_group rightcol">
+					<li>
+              			<label for="sendemail"><input type="checkbox" name="sendemail" value="1" id="sendemail" tabindex="1" /> {vb:rawphrase phpkd_vbsas_sendemail}</label>
+					</li>
+				</ul>
+			</div>
+
+			<div class="blockrow">
+				<label for="deletereason">{vb:rawphrase phpkd_vbsas_delete_reason_title}:</label>
+				<input type="text" class="primary textbox" name="deletereason" value="{vb:raw threadinfo.del_reason}" maxlength="125" tabindex="1" />
+				<p class="description">
+					{vb:rawphrase phpkd_vbsas_delete_reason_desc}
+				</p>
+			</div>
+
+		</div>
+	</div>
+	<div class="blockfoot actionbuttons">
+		<div class="group">
+			<input type="submit" class="button" value="{vb:rawphrase phpkd_vbsas_memberaction}" accesskey="s" tabindex="1" />
+			<input type="reset" class="button" value="{vb:rawphrase reset_fields}" accesskey="r" tabindex="1" />
+			<input type="hidden" name="s" value="{vb:raw session.sessionhash}" />
+			<input type="hidden" name="securitytoken" value="{vb:raw bbuserinfo.securitytoken}" />
+			<input type="hidden" name="do" value="phpkd_vbsas_do" />
+			<input type="hidden" name="userid" value="{vb:raw phpkd_vbsas.userid}"  />
+		</div>
+	</div>
+</form>
+
+{vb:raw footer}
+</body>
+</html>]]></template>
+		<template name="phpkd_vbsas_form" templatetype="template" date="1369703395" username="PHPKD" version="4.2.100"><![CDATA[<vb:if condition="$vboptions['phpkd_vbsas_reglock']">
+<script type="text/javascript" src="clientscript/jquery/jquery-1.9.1.min.js?v={vb:raw vboptions.simpleversion}"></script>
+<script type="text/javascript">
+<!--
+	$.fn.timedDisable = function(time)
+	{
+		if (time == null)
+		{
+			time = {vb:raw phpkd_vbsas_timewait} * 1000;
+		}
+
+		var seconds = Math.ceil(time / 1000);
+
+		return $(this).each(function()
+		{
+			$(this).attr('disabled', 'disabled');
+			var disabledElem = $(this);
+			var originalText = this.value;
+			disabledElem.val(originalText + ' (' + seconds + ')');
+
+			var interval = setInterval(function()
+			{
+				disabledElem.val(originalText + ' (' + --seconds + ')');
+
+				if (seconds === 0)
+				{
+					disabledElem.removeAttr('disabled').val(originalText);
+					clearInterval(interval);
+				}
+			}, 1000);
+		});
+	};
+
+	$(function() {
+		$('input[value="{vb:rawphrase complete_registration}"]').timedDisable();
+	});
+//-->
+</script>
+</vb:if>
+
+<input type="hidden" name="phpkd_vbsas_timenow" value="{vb:raw phpkd_vbsas_timenow}" />
+<input type="hidden" name="phpkd_vbsas_timewait" value="{vb:raw phpkd_vbsas_timewait}" />
+<input type="hidden" name="phpkd_vbsas_hash" value="{vb:raw phpkd_vbsas_hash}" />]]></template>
+		<template name="phpkd_vbsas_memberaction" templatetype="template" date="1375125457" username="PHPKD" version="4.2.100"><![CDATA[		<style type="text/css" id="vbulletin_user_css">
+		<!--
+		.memberaction_body.popupbody li .siteicon_moderation {
+			background:url({vb:stylevar imgdir_siteicons}/moderation.png) {vb:stylevar left} 2px no-repeat;
+		}
+		-->
+		</style>
+
+		<li class="right">
+			<a href="misc.php?{vb:raw session.sessionurl}do=phpkd_vbsas&amp;u={vb:raw memberinfo.userid}" class="siteicon_moderation">
+				{vb:rawphrase phpkd_vbsas_memberaction}
+			</a>
+		</li>]]></template>
+	</templates>
+	<stylevardfns>
+	</stylevardfns>
+	<stylevars>
+	</stylevars>
+	<plugins>
+		<plugin active="1" executionorder="5">
+			<title><![CDATA[PHPKD - vB Spam Assassin [ Cache Templates ]]]></title>
+			<hookname>cache_templates</hookname>
+			<phpcode><![CDATA[if ($vbulletin->options['phpkd_vbsas_active'])
+{
+	switch (THIS_SCRIPT)
+	{
+		case 'register':
+			$cache[] = 'phpkd_vbsas_form';
+			break;
+
+		case 'misc':
+			$cache[] = 'phpkd_vbsas_confirm';
+			break;
+	}
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title><![CDATA[PHPKD - vB Spam Assassin [ FB Auto Register Checkpoint ]]]></title>
+			<hookname>fb_auto_register</hookname>
+			<phpcode><![CDATA[define('PHPKD_VBSAS_FBAUTOREGISTER', true);]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title><![CDATA[PHPKD - vB Spam Assassin [ Memberaction Dropdown ]]]></title>
+			<hookname>memberaction_dropdown</hookname>
+			<phpcode><![CDATA[if ($vbulletin->options['phpkd_vbsas_active'] && in_array($vbulletin->userinfo['usergroupid'], unserialize($vbulletin->options['phpkd_vbsas_puids'])))
+{
+	$phpkd_vbsas_exuser = array($vbulletin->userinfo['userid']);
+	$phpkd_vbsas_exusergroup = array_merge(array($vbulletin->userinfo['usergroupid']), unserialize($vbulletin->options['phpkd_vbsas_puids']));
+
+	if ($vbulletin->options['phpkd_vbsas_inex_users'] == 2)
+	{
+		$phpkd_vbsas_exuser = array_merge($phpkd_vbsas_exuser, explode(',', $vbulletin->options['phpkd_vbsas_inex_users_ids']));
+	}
+
+	if ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 2)
+	{
+		$phpkd_vbsas_exusergroup = array_merge($phpkd_vbsas_exusergroup, explode(',', $vbulletin->options['phpkd_vbsas_inex_usergroups_ids']));
+	}
+
+	if (((!$vbulletin->options['phpkd_vbsas_inex_users'] AND !in_array($memberinfo['userid'], $phpkd_vbsas_exuser))
+			|| ($vbulletin->options['phpkd_vbsas_inex_users'] == 1 && in_array($memberinfo['userid'], explode(',', $vbulletin->options['phpkd_vbsas_inex_users_ids'])))
+			|| ($vbulletin->options['phpkd_vbsas_inex_users'] == 2 && !in_array($memberinfo['userid'], $phpkd_vbsas_exuser)))
+			&& ((!$vbulletin->options['phpkd_vbsas_inex_usergroups'] AND !in_array($memberinfo['usergroupid'], $phpkd_vbsas_exusergroup))
+			|| ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 1 && in_array($memberinfo['usergroupid'], explode(',', $vbulletin->options['phpkd_vbsas_inex_usergroups_ids'])))
+			|| ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 2 && !in_array($memberinfo['usergroupid'], $phpkd_vbsas_exusergroup))))
+	{
+		$templater = vB_Template::create('phpkd_vbsas_memberaction');
+		$templater->register('memberinfo', $memberinfo);
+		$template_hook['memberaction_dropdown_items'] .= $templater->render();
+	}
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title><![CDATA[PHPKD - vB Spam Assassin [ Memberinfo Profile Link ]]]></title>
+			<hookname>member_complete</hookname>
+			<phpcode><![CDATA[if ($vbulletin->options['phpkd_vbsas_active'] && in_array($vbulletin->userinfo['usergroupid'], unserialize($vbulletin->options['phpkd_vbsas_puids'])))
+{
+	$phpkd_vbsas_exuser = array($vbulletin->userinfo['userid']);
+	$phpkd_vbsas_exusergroup = array_merge(array($vbulletin->userinfo['usergroupid']), unserialize($vbulletin->options['phpkd_vbsas_puids']));
+
+	if ($vbulletin->options['phpkd_vbsas_inex_users'] == 2)
+	{
+		$phpkd_vbsas_exuser = array_merge($phpkd_vbsas_exuser, explode(',', $vbulletin->options['phpkd_vbsas_inex_users_ids']));
+	}
+
+	if ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 2)
+	{
+		$phpkd_vbsas_exusergroup = array_merge($phpkd_vbsas_exusergroup, explode(',', $vbulletin->options['phpkd_vbsas_inex_usergroups_ids']));
+	}
+
+	if (((!$vbulletin->options['phpkd_vbsas_inex_users'] AND !in_array($userinfo['userid'], $phpkd_vbsas_exuser))
+			|| ($vbulletin->options['phpkd_vbsas_inex_users'] == 1 && in_array($userinfo['userid'], explode(',', $vbulletin->options['phpkd_vbsas_inex_users_ids'])))
+			|| ($vbulletin->options['phpkd_vbsas_inex_users'] == 2 && !in_array($userinfo['userid'], $phpkd_vbsas_exuser)))
+			&& ((!$vbulletin->options['phpkd_vbsas_inex_usergroups'] AND !in_array($userinfo['usergroupid'], $phpkd_vbsas_exusergroup))
+			|| ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 1 && in_array($userinfo['usergroupid'], explode(',', $vbulletin->options['phpkd_vbsas_inex_usergroups_ids'])))
+			|| ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 2 && !in_array($userinfo['usergroupid'], $phpkd_vbsas_exusergroup))))
+	{
+		$vbulletin->templatecache['MEMBERINFO'] = str_replace('vB_Template_Runtime::parsePhrase("find_all_started_threads") . \'</a></li>', 'vB_Template_Runtime::parsePhrase("find_all_started_threads") . \'</a></li><li><a href="misc.php?\' . $session[\'sessionurl\'] . \'do=phpkd_vbsas&amp;u=\' . $userinfo[\'userid\'] . \'"><img src="\' . vB_Template_Runtime::fetchStylevar("imgdir_siteicons") . \'/moderation.png" alt="\' . vB_Template_Runtime::parsePhrase("phpkd_vbsas_memberaction") . \'" class="inlineimg" /> \' . vB_Template_Runtime::parsePhrase("phpkd_vbsas_memberaction") . \'</a></li>', $vbulletin->templatecache['MEMBERINFO']);
+	}
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title><![CDATA[PHPKD - vB Spam Assassin [ Delete Spammer ]]]></title>
+			<hookname>misc_start</hookname>
+			<phpcode><![CDATA[if ($vbulletin->options['phpkd_vbsas_active'] && in_array($vbulletin->userinfo['usergroupid'], unserialize($vbulletin->options['phpkd_vbsas_puids'])))
+{
+	if ($_POST['do'] == 'phpkd_vbsas_do')
+	{
+		$vbulletin->input->clean_array_gpc('p', array(
+			'userid' => TYPE_INT,
+			'deleteconfirm' => TYPE_INT,
+			'sendemail' => TYPE_INT,
+			'deletereason' => TYPE_STR,
+		));
+
+		if (!$vbulletin->GPC['userid'] OR ($phpkd_vbsas = fetch_userinfo($vbulletin->GPC['userid'])) == false)
+		{
+			eval(standard_error(fetch_error('invalidid', $vbphrase['user'], $vbulletin->options['contactuslink'])));
+		}
+
+		if (!$vbulletin->GPC['deleteconfirm'])
+		{
+			eval(standard_error(fetch_error('phpkd_vbsas_deleteconfirm')));
+		}
+
+		$phpkd_vbsas_exuser = array($vbulletin->userinfo['userid']);
+		$phpkd_vbsas_exusergroup = array_merge(array($vbulletin->userinfo['usergroupid']), unserialize($vbulletin->options['phpkd_vbsas_puids']));
+
+		if ($vbulletin->options['phpkd_vbsas_inex_users'] == 2)
+		{
+			$phpkd_vbsas_exuser = array_merge($phpkd_vbsas_exuser, explode(',', $vbulletin->options['phpkd_vbsas_inex_users_ids']));
+		}
+
+		if ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 2)
+		{
+			$phpkd_vbsas_exusergroup = array_merge($phpkd_vbsas_exusergroup, explode(',', $vbulletin->options['phpkd_vbsas_inex_usergroups_ids']));
+		}
+
+		if (((!$vbulletin->options['phpkd_vbsas_inex_users'] AND !in_array($phpkd_vbsas['userid'], $phpkd_vbsas_exuser))
+				|| ($vbulletin->options['phpkd_vbsas_inex_users'] == 1 && in_array($phpkd_vbsas['userid'], explode(',', $vbulletin->options['phpkd_vbsas_inex_users_ids'])))
+				|| ($vbulletin->options['phpkd_vbsas_inex_users'] == 2 && !in_array($phpkd_vbsas['userid'], $phpkd_vbsas_exuser)))
+				&& ((!$vbulletin->options['phpkd_vbsas_inex_usergroups'] AND !in_array($phpkd_vbsas['usergroupid'], $phpkd_vbsas_exusergroup))
+				|| ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 1 && in_array($phpkd_vbsas['usergroupid'], explode(',', $vbulletin->options['phpkd_vbsas_inex_usergroups_ids'])))
+				|| ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 2 && !in_array($phpkd_vbsas['usergroupid'], $phpkd_vbsas_exusergroup))))
+		{
+			// Delete User
+			$userdata =& datamanager_init('PHPKD_VBSAS', $vbulletin, ERRTYPE_CP);
+			$userdata->set_existing($phpkd_vbsas);
+			$userdata->delete(true, $vbulletin->options['phpkd_vbsas_ban']);
+			unset($userdata);
+
+			$phpkd_vbsas_actioner = $vbulletin->userinfo;
+
+			// Send Email Notification
+			if ($vbulletin->GPC['sendemail'] && $vbulletin->options['phpkd_vbsas_notification'] & $vbulletin->bf_misc_phpkd_vbsas_notify['phpkd_vbsas_email'] && $vbulletin->options['enableemail'])
+			{
+				require_once(DIR . '/includes/class_bbcode_alt.php');
+				$plaintext_parser = new vB_BbCodeParser_PlainText($vbulletin, fetch_tag_list());
+
+				if (!empty($phpkd_vbsas['email']))
+				{
+					$email_langid = ($phpkd_vbsas['languageid'] > 0 ? $phpkd_vbsas['languageid'] : $vbulletin->options['languageid']);
+					$plaintext_parser->set_parsing_language($email_langid);
+					eval(fetch_email_phrases('phpkd_vbsas_notification_deleted_spammer', $email_langid));
+					vbmail($phpkd_vbsas['email'], $subject, $plaintext_parser->parse($message), true);
+				}
+
+				unset($plaintext_parser);
+			}
+
+			$phpkd_vbsas_notified = array_diff(explode(',', $vbulletin->options['phpkd_vbsas_notified']), array($vbulletin->userinfo['userid']));
+
+			if (!empty($phpkd_vbsas_notified))
+			{
+				foreach ($phpkd_vbsas_notified as $phpkd_vbsas_notified_userid)
+				{
+					$phpkd_vbsas_recipient = fetch_userinfo($phpkd_vbsas_notified_userid);
+					$phpkd_vbsas_reportforum = fetch_foruminfo($vbulletin->options['phpkd_vbsas_notification_fid']);
+					$bbtitle = $vbulletin->options['bbtitle'];
+					$bburl = $vbulletin->options['bburl'];
+
+					if (is_array($phpkd_vbsas_recipient) && !empty($phpkd_vbsas_recipient))
+					{
+						// Send PM Notifications
+						if ($vbulletin->options['phpkd_vbsas_notification'] & $vbulletin->bf_misc_phpkd_vbsas_notify['phpkd_vbsas_pm'] && $vbulletin->options['phpkd_vbsas_notifier'] && ($notifier = fetch_userinfo($vbulletin->options['phpkd_vbsas_notifier'])))
+						{
+							cache_permissions($notifier, false);
+
+							if (!empty($phpkd_vbsas_recipient['username']))
+							{
+								$email_langid = ($phpkd_vbsas_recipient['languageid'] > 0 ? $phpkd_vbsas_recipient['languageid'] : $vbulletin->options['languageid']);
+								eval(fetch_email_phrases('phpkd_vbsas_notification_deleted', $email_langid));
+
+								// create the DM to do error checking and insert the new PM
+								$pmdm =& datamanager_init('PM', $vbulletin, ERRTYPE_SILENT);
+								$pmdm->set_info('is_automated', true);
+								$pmdm->set('fromuserid', $notifier['userid']);
+								$pmdm->set('fromusername', $notifier['username']);
+								$pmdm->set_info('receipt', false);
+								$pmdm->set_info('savecopy', false);
+								$pmdm->set('title', $subject);
+								$pmdm->set('message', $message);
+								$pmdm->set_recipients(unhtmlspecialchars($phpkd_vbsas_recipient['username']), $notifier['permissions']);
+								$pmdm->set('dateline', TIMENOW);
+								$pmdm->set('allowsmilie', true);
+
+								$pmdm->pre_save();
+								if (empty($pmdm->errors))
+								{
+									$pmdm->save();
+								}
+								unset($pmdm);
+							}
+						}
+
+						// Send Email Notifications
+						if ($vbulletin->options['phpkd_vbsas_notification'] & $vbulletin->bf_misc_phpkd_vbsas_notify['phpkd_vbsas_email'] && $vbulletin->options['enableemail'])
+						{
+							require_once(DIR . '/includes/class_bbcode_alt.php');
+							$plaintext_parser = new vB_BbCodeParser_PlainText($vbulletin, fetch_tag_list());
+
+							if (!empty($phpkd_vbsas_recipient['email']))
+							{
+								$email_langid = ($phpkd_vbsas_recipient['languageid'] > 0 ? $phpkd_vbsas_recipient['languageid'] : $vbulletin->options['languageid']);
+								$plaintext_parser->set_parsing_language($email_langid);
+								eval(fetch_email_phrases('phpkd_vbsas_notification_deleted', $email_langid));
+								vbmail($phpkd_vbsas_recipient['email'], $subject, $plaintext_parser->parse($message), true);
+							}
+
+							unset($plaintext_parser);
+						}
+					}
+				}
+			}
+
+			// Post New Thread
+			if ($vbulletin->options['phpkd_vbsas_notification'] & $vbulletin->bf_misc_phpkd_vbsas_notify['phpkd_vbsas_thread'] && is_array($phpkd_vbsas_reportforum) && !empty($phpkd_vbsas_reportforum))
+			{
+				eval(fetch_email_phrases('phpkd_vbsas_notification_deleted', $vbulletin->options['languageid']));
+
+				$threadman =& datamanager_init('Thread_FirstPost', $vbulletin, ERRTYPE_SILENT, 'threadpost');
+				$threadman->set_info('forum', $phpkd_vbsas_reportforum);
+				$threadman->set_info('is_automated', true);
+				$threadman->set_info('skip_moderator_email', true);
+				$threadman->set_info('mark_thread_read', true);
+				$threadman->set_info('parseurl', true);
+				$threadman->set('allowsmilie', true);
+				$threadman->set('userid', $notifier['userid']);
+				$threadman->setr_info('user', $notifier);
+				$threadman->set('title', $subject);
+				$threadman->set('pagetext', $message);
+				$threadman->set('forumid', $phpkd_vbsas_reportforum['forumid']);
+				$threadman->set('visible', 1);
+
+				// not posting as the current user, IP won't make sense
+				$threadman->set('ipaddress', '');
+
+				if ($rpthreadid = $threadman->save())
+				{
+					$threadman->set_info('skip_moderator_email', false);
+					$threadman->email_moderators(array('newthreademail', 'newpostemail'));
+
+					// check the permission of the posting user
+					$userperms = fetch_permissions($phpkd_vbsas_reportforum['forumid'], $notifier['userid'], $notifier);
+
+					if (($userperms & $vbulletin->bf_ugp_forumpermissions['canview']) && ($userperms & $vbulletin->bf_ugp_forumpermissions['canviewthreads']) && $notifier['autosubscribe'] != -1)
+					{
+						$vbulletin->db->query_write("
+							INSERT IGNORE INTO " . TABLE_PREFIX . "subscribethread
+								(userid, threadid, emailupdate, folderid, canview)
+							VALUES
+								(" . $notifier['userid'] . ", $rpthreadid, $notifier[autosubscribe], 0, 1)
+								");
+					}
+				}
+
+				unset($threadman);
+			}
+		}
+
+		$vbulletin->url = fetch_seo_url('forumhome', array());
+		print_standard_redirect('redirect_inline_threadlist_cleared', true, $forceredirect);
+	}
+
+	if ($_REQUEST['do'] == 'phpkd_vbsas')
+	{
+		$vbulletin->input->clean_gpc('r', 'userid', TYPE_INT);
+
+		if (!$vbulletin->GPC['userid'] OR ($phpkd_vbsas = fetch_userinfo($vbulletin->GPC['userid'])) == false OR $vbulletin->GPC['userid'] == $vbulletin->userinfo['userid'])
+		{
+			eval(standard_error(fetch_error('invalidid', $vbphrase['user'], $vbulletin->options['contactuslink'])));
+		}
+
+		$phpkd_vbsas_exuser = array($vbulletin->userinfo['userid']);
+		$phpkd_vbsas_exusergroup = array_merge(array($vbulletin->userinfo['usergroupid']), unserialize($vbulletin->options['phpkd_vbsas_puids']));
+
+		if ($vbulletin->options['phpkd_vbsas_inex_users'] == 2)
+		{
+			$phpkd_vbsas_exuser = array_merge($phpkd_vbsas_exuser, explode(',', $vbulletin->options['phpkd_vbsas_inex_users_ids']));
+		}
+
+		if ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 2)
+		{
+			$phpkd_vbsas_exusergroup = array_merge($phpkd_vbsas_exusergroup, explode(',', $vbulletin->options['phpkd_vbsas_inex_usergroups_ids']));
+		}
+
+		if (((!$vbulletin->options['phpkd_vbsas_inex_users'] AND !in_array($phpkd_vbsas['userid'], $phpkd_vbsas_exuser))
+				|| ($vbulletin->options['phpkd_vbsas_inex_users'] == 1 && in_array($phpkd_vbsas['userid'], explode(',', $vbulletin->options['phpkd_vbsas_inex_users_ids'])))
+				|| ($vbulletin->options['phpkd_vbsas_inex_users'] == 2 && !in_array($phpkd_vbsas['userid'], $phpkd_vbsas_exuser)))
+				&& ((!$vbulletin->options['phpkd_vbsas_inex_usergroups'] AND !in_array($phpkd_vbsas['usergroupid'], $phpkd_vbsas_exusergroup))
+				|| ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 1 && in_array($phpkd_vbsas['usergroupid'], explode(',', $vbulletin->options['phpkd_vbsas_inex_usergroups_ids'])))
+				|| ($vbulletin->options['phpkd_vbsas_inex_usergroups'] == 2 && !in_array($phpkd_vbsas['usergroupid'], $phpkd_vbsas_exusergroup))))
+		{
+			$navbits = construct_navbits(array(fetch_seo_url('forumhome', array()) => $vbphrase['forum'], '' => $vbphrase['phpkd_vbsas_title']));
+			$navbar = render_navbar_template($navbits);
+
+			$templater = vB_Template::create('phpkd_vbsas_confirm');
+			$templater->register_page_templates();
+			$templater->register('navbar', $navbar);
+			$templater->register('phpkd_vbsas', $phpkd_vbsas);
+			print_output($templater->render());
+		}
+	}
+}
+else
+{
+	print_no_permission();
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title><![CDATA[PHPKD - vB Spam Assassin [ Process Registration Notification ]]]></title>
+			<hookname>register_addmember_complete</hookname>
+			<phpcode><![CDATA[if ($vbulletin->options['phpkd_vbsas_active'] && $_POST['do'] == 'addmember' && !defined('PHPKD_VBSAS_FBAUTOREGISTER'))
+			{
+				$vbulletin->input->clean_array_gpc('p', array(
+					'phpkd_vbsas_timenow'    => TYPE_UINT,
+					'phpkd_vbsas_timewait'   => TYPE_UINT,
+					'phpkd_vbsas_hash'       => TYPE_STR,
+				));
+
+				$bbtitle = $vbulletin->options['bbtitle'];
+				$bburl = $vbulletin->options['bburl'];
+
+				$phpkd_vbsas_spammer = array(
+					'username'		=> $vbulletin->GPC['username'],
+					'email'			=> $vbulletin->GPC['email'],
+					'referrername'	=> $vbulletin->GPC['referrername'],
+					'ipaddress'		=> IPADDRESS,
+					'timenow'		=> vbdate($vbulletin->options['dateformat'], TIMENOW) . ' - ' . vbdate($vbulletin->options['timeformat'], TIMENOW),
+					'timewait'		=> $vbulletin->GPC['phpkd_vbsas_timewait'],
+					'timepass'		=> TIMENOW - $vbulletin->GPC['phpkd_vbsas_timenow'],
+				);
+
+				if ($vbulletin->GPC['phpkd_vbsas_timewait'] >= (TIMENOW - $vbulletin->GPC['phpkd_vbsas_timenow']))
+				{
+					$notifier = fetch_userinfo($vbulletin->options['phpkd_vbsas_notifier']);
+					$phpkd_vbsas_notified = explode(',', $vbulletin->options['phpkd_vbsas_notified']);
+
+					if (!empty($phpkd_vbsas_notified) && !empty($notifier))
+					{
+						foreach ($phpkd_vbsas_notified as $phpkd_vbsas_notified_userid)
+						{
+							$phpkd_vbsas_recipient = fetch_userinfo($phpkd_vbsas_notified_userid);
+							$phpkd_vbsas_reportforum = fetch_foruminfo($vbulletin->options['phpkd_vbsas_notification_fid']);
+
+							if (is_array($phpkd_vbsas_recipient) && !empty($phpkd_vbsas_recipient))
+							{
+								// Send PM Notifications
+								if ($vbulletin->options['phpkd_vbsas_notification'] & $vbulletin->bf_misc_phpkd_vbsas_notify['phpkd_vbsas_pm'] && $vbulletin->options['phpkd_vbsas_notifier'])
+								{
+									cache_permissions($notifier, false);
+
+									if (!empty($phpkd_vbsas_recipient['username']))
+									{
+										$email_langid = ($phpkd_vbsas_recipient['languageid'] > 0 ? $phpkd_vbsas_recipient['languageid'] : $vbulletin->options['languageid']);
+										eval(fetch_email_phrases('phpkd_vbsas_notification', $email_langid));
+
+										// create the DM to do error checking and insert the new PM
+										$pmdm =& datamanager_init('PM', $vbulletin, ERRTYPE_SILENT);
+										$pmdm->set_info('is_automated', true);
+										$pmdm->set('fromuserid', $notifier['userid']);
+										$pmdm->set('fromusername', $notifier['username']);
+										$pmdm->set_info('receipt', false);
+										$pmdm->set_info('savecopy', false);
+										$pmdm->set('title', $subject);
+										$pmdm->set('message', $message);
+										$pmdm->set_recipients(unhtmlspecialchars($phpkd_vbsas_recipient['username']), $notifier['permissions']);
+										$pmdm->set('dateline', TIMENOW);
+										$pmdm->set('allowsmilie', true);
+
+										$pmdm->pre_save();
+										if (empty($pmdm->errors))
+										{
+											$pmdm->save();
+										}
+										unset($pmdm);
+									}
+								}
+
+								// Send Email Notifications
+								if ($vbulletin->options['phpkd_vbsas_notification'] & $vbulletin->bf_misc_phpkd_vbsas_notify['phpkd_vbsas_email'] && $vbulletin->options['enableemail'])
+								{
+									require_once(DIR . '/includes/class_bbcode_alt.php');
+									$plaintext_parser = new vB_BbCodeParser_PlainText($vbulletin, fetch_tag_list());
+
+									if (!empty($phpkd_vbsas_recipient['email']))
+									{
+										$email_langid = ($phpkd_vbsas_recipient['languageid'] > 0 ? $phpkd_vbsas_recipient['languageid'] : $vbulletin->options['languageid']);
+										$plaintext_parser->set_parsing_language($email_langid);
+										eval(fetch_email_phrases('phpkd_vbsas_notification', $email_langid));
+										vbmail($phpkd_vbsas_recipient['email'], $subject, $plaintext_parser->parse($message), true);
+									}
+
+									unset($plaintext_parser);
+								}
+							}
+						}
+					}
+
+					// Post New Thread
+					if ($vbulletin->options['phpkd_vbsas_notification'] & $vbulletin->bf_misc_phpkd_vbsas_notify['phpkd_vbsas_thread'] && is_array($phpkd_vbsas_reportforum) && !empty($phpkd_vbsas_reportforum) && !empty($notifier))
+					{
+						eval(fetch_email_phrases('phpkd_vbsas_notification', $vbulletin->options['languageid']));
+
+						$threadman =& datamanager_init('Thread_FirstPost', $vbulletin, ERRTYPE_SILENT, 'threadpost');
+						$threadman->set_info('forum', $phpkd_vbsas_reportforum);
+						$threadman->set_info('is_automated', true);
+						$threadman->set_info('skip_moderator_email', true);
+						$threadman->set_info('mark_thread_read', true);
+						$threadman->set_info('parseurl', true);
+						$threadman->set('allowsmilie', true);
+						$threadman->set('userid', $notifier['userid']);
+						$threadman->setr_info('user', $notifier);
+						$threadman->set('title', $subject);
+						$threadman->set('pagetext', $message);
+						$threadman->set('forumid', $phpkd_vbsas_reportforum['forumid']);
+						$threadman->set('visible', 1);
+
+						// not posting as the current user, IP won't make sense
+						$threadman->set('ipaddress', '');
+
+						if ($rpthreadid = $threadman->save())
+						{
+							$threadman->set_info('skip_moderator_email', false);
+							$threadman->email_moderators(array('newthreademail', 'newpostemail'));
+
+							// check the permission of the posting user
+							$userperms = fetch_permissions($phpkd_vbsas_reportforum['forumid'], $notifier['userid'], $notifier);
+
+							if (($userperms & $vbulletin->bf_ugp_forumpermissions['canview']) && ($userperms & $vbulletin->bf_ugp_forumpermissions['canviewthreads']) && $notifier['autosubscribe'] != -1)
+							{
+								$vbulletin->db->query_write("
+									INSERT IGNORE INTO " . TABLE_PREFIX . "subscribethread
+										(userid, threadid, emailupdate, folderid, canview)
+									VALUES
+										(" . $notifier['userid'] . ", $rpthreadid, $notifier[autosubscribe], 0, 1)
+								");
+							}
+						}
+
+						unset($threadman);
+					}
+				}
+			}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title><![CDATA[PHPKD - vB Spam Assassin [ Inject Registration Form ]]]></title>
+			<hookname>register_form_complete</hookname>
+			<phpcode><![CDATA[if ($vbulletin->options['phpkd_vbsas_active'])
+{
+	$templater = vB_Template::create('phpkd_vbsas_form');
+		$templater->register('phpkd_vbsas_timenow', TIMENOW);
+		$templater->register('phpkd_vbsas_timewait', rand($vbulletin->options['phpkd_vbsas_reghv_min'], $vbulletin->options['phpkd_vbsas_reghv_max']));
+		$templater->register('phpkd_vbsas_hash', md5(md5($_SERVER['REMOTE_ADDR'] . md5($vbulletin->session->vars['sessionhash'] . md5(COOKIE_SALT)))));
+	$human_verify .= $templater->render();
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title><![CDATA[PHPKD - vB Spam Assassin [ Template Grouping ]]]></title>
+			<hookname>template_groups</hookname>
+			<phpcode><![CDATA[$only['phpkd_vbsas'] = $vbphrase['phpkd_vbsas'];]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title><![CDATA[PHPKD - vB Spam Assassin [ Useradmin Edit Quicklinks ]]]></title>
+			<hookname>useradmin_edit_start</hookname>
+			<phpcode><![CDATA[$quicklinks["../misc.php?" . $vbulletin->session->vars['sessionurl'] . "do=phpkd_vbsas&amp;u=" . $vbulletin->GPC['userid']] = $vbphrase['phpkd_vbsas_memberaction'];]]></phpcode>
+		</plugin>
+	</plugins>
+	<phrases>
+		<phrasetype name="Control Panel Options" fieldname="cpoption">
+			<phrase name="phpkd_vbsas_email" date="1375051426" username="PHPKD" version="4.2.100"><![CDATA[Email]]></phrase>
+			<phrase name="phpkd_vbsas_inex_usergroups_all" date="1375062623" username="PHPKD" version="4.2.100"><![CDATA[Include All Usergroups]]></phrase>
+			<phrase name="phpkd_vbsas_inex_usergroups_ex" date="1375062665" username="PHPKD" version="4.2.100"><![CDATA[Exclude Specific Usergroups]]></phrase>
+			<phrase name="phpkd_vbsas_inex_usergroups_in" date="1375062655" username="PHPKD" version="4.2.100"><![CDATA[Include Specific Usergroups]]></phrase>
+			<phrase name="phpkd_vbsas_inex_users_all" date="1375062701" username="PHPKD" version="4.2.100"><![CDATA[Include All Users]]></phrase>
+			<phrase name="phpkd_vbsas_inex_users_ex" date="1375062681" username="PHPKD" version="4.2.100"><![CDATA[Exclude Specific Users]]></phrase>
+			<phrase name="phpkd_vbsas_inex_users_in" date="1375062691" username="PHPKD" version="4.2.100"><![CDATA[Include Specific Users]]></phrase>
+			<phrase name="phpkd_vbsas_ip" date="1377026197" username="PHPKD" version="4.2.100"><![CDATA[IP Address]]></phrase>
+			<phrase name="phpkd_vbsas_pm" date="1375051436" username="PHPKD" version="4.2.100"><![CDATA[PM]]></phrase>
+			<phrase name="phpkd_vbsas_thread" date="1375716823" username="PHPKD" version="4.2.100"><![CDATA[Thread]]></phrase>
+		</phrasetype>
+		<phrasetype name="Email Body Text" fieldname="emailbody">
+			<phrase name="phpkd_vbsas_notification" date="1369516562" username="PHPKD" version="4.2.100"><![CDATA[[B]Hello Dear $phpkd_vbsas_recipient[username],[/B]
+
+A new potential spam registration has been detected, details as follow:
+Username: [URL="$bburl/member.php?username=$phpkd_vbsas_spammer[username]"]$phpkd_vbsas_spammer[username][/URL]
+Email: [EMAIL="$phpkd_vbsas_spammer[email]"]$phpkd_vbsas_spammer[email][/EMAIL]
+Referrer Name: $phpkd_vbsas_spammer[referrername]
+IP Address: $phpkd_vbsas_spammer[ipaddress]
+Time Detected: $phpkd_vbsas_spammer[timenow]
+Time To Wait: $phpkd_vbsas_spammer[timewait]
+Time Waited Actually: $phpkd_vbsas_spammer[timepass]
+
+[B]Best Regards,
+$bbtitle [/B]]]></phrase>
+			<phrase name="phpkd_vbsas_notification_deleted" date="1375715390" username="PHPKD" version="4.2.100"><![CDATA[[B]Hello Dear Staff,[/B]
+
+A new potential spammer has been deleted by [URL="$bburl/member.php?username=$phpkd_vbsas_actioner[username]"]$phpkd_vbsas_actioner[username][/URL] :
+Username: [URL="$bburl/member.php?username=$phpkd_vbsas[username]"]$phpkd_vbsas[username][/URL]
+Email: [EMAIL="$phpkd_vbsas[email]"]$phpkd_vbsas[email][/EMAIL]
+Referrer Name: $phpkd_vbsas[referrername]
+IP Address: $phpkd_vbsas[ipaddress]
+
+[B]Best Regards,
+$bbtitle [/B]]]></phrase>
+			<phrase name="phpkd_vbsas_notification_deleted_spammer" date="1375719550" username="PHPKD" version="4.2.100"><![CDATA[[B]Hello Dear Spammer,[/B]
+
+Your user account has been deleted as a potential spammer by [URL="$bburl/member.php?username=$phpkd_vbsas_actioner[username]"]$phpkd_vbsas_actioner[username][/URL] :
+
+[B]Best Regards,
+$bbtitle [/B]]]></phrase>
+		</phrasetype>
+		<phrasetype name="Email Subject Text" fieldname="emailsubject">
+			<phrase name="phpkd_vbsas_notification" date="1369516584" username="PHPKD" version="4.2.100"><![CDATA[Potential Spam Registration Detected: $phpkd_vbsas_spammer[username]]]></phrase>
+			<phrase name="phpkd_vbsas_notification_deleted" date="1375517619" username="PHPKD" version="4.2.100"><![CDATA[Potential Spam User Deleted: $phpkd_vbsas[username]]]></phrase>
+		</phrasetype>
+		<phrasetype name="Error Messages" fieldname="error">
+			<phrase name="phpkd_vbsas_deleteconfirm" date="1375515678" username="PHPKD" version="4.2.100"><![CDATA[You have NOT confirmed deletion as Spammer! Please return back and confirm deletion process first.]]></phrase>
+		</phrasetype>
+		<phrasetype name="GLOBAL" fieldname="global">
+			<phrase name="phpkd_vbsas_delete_reason_desc" date="1375227208" username="PHPKD" version="4.2.100"><![CDATA[You can leave a reason for content which is Soft Deleted so you remember why you deleted it, same reason will be used as a ban reason.]]></phrase>
+			<phrase name="phpkd_vbsas_delete_reason_title" date="1375235077" username="PHPKD" version="4.2.100"><![CDATA[Reason for Ban/Delete]]></phrase>
+			<phrase name="phpkd_vbsas_deleteconfirm_desc" date="1377037462" username="PHPKD" version="4.2.100"><![CDATA[Once you check this confirmation checkbox, and submit this form all traces of this user will permanently deleted. This deletion process includes all posted of data: Threads, Posts, Attachments, Calendar Events, Albums, Pictures, Social Groups, Group Discussions, Group Pictures, Announcements, Private Messages, Blogs, Blog Posts, Blog Comments, Visitor Messages, and All Other Traces [Active Sessions, User Notes, Infractions, CP Logs, Group Memberships]), and optionaly (according to product's settings) Ban IP(s), Ban Email(s).]]></phrase>
+			<phrase name="phpkd_vbsas_deleteconfirm_title" date="1375698761" username="PHPKD" version="4.2.100"><![CDATA[Confirm Deletion]]></phrase>
+			<phrase name="phpkd_vbsas_desc" date="1375698703" username="PHPKD" version="4.2.100"><![CDATA[This process can NOT be undone. Make sure of what you are doing..]]></phrase>
+			<phrase name="phpkd_vbsas_memberaction" date="1375701740" username="PHPKD" version="4.2.100"><![CDATA[Delete as Spammer]]></phrase>
+			<phrase name="phpkd_vbsas_options" date="1377034624" username="PHPKD" version="4.2.100"><![CDATA[Options]]></phrase>
+			<phrase name="phpkd_vbsas_sendemail" date="1377034615" username="PHPKD" version="4.2.100"><![CDATA[Notify Spammer By Email]]></phrase>
+			<phrase name="phpkd_vbsas_userinfo_desc" date="1375224614" username="PHPKD" version="4.2.100"><![CDATA[<strong>Username:</strong> {1}, <strong>Userid:</strong> {2}, <strong>Email:</strong> {3}, <strong>Registration IP:</strong> {4}]]></phrase>
+			<phrase name="phpkd_vbsas_userinfo_title" date="1375224499" username="PHPKD" version="4.2.100"><![CDATA[User Info]]></phrase>
+		</phrasetype>
+		<phrasetype name="Style Tools" fieldname="style">
+			<phrase name="phpkd_vbsas" date="1369349594" username="PHPKD" version="4.2.100"><![CDATA[PHPKD - vB Spam Assassin]]></phrase>
+		</phrasetype>
+		<phrasetype name="vBulletin Settings" fieldname="vbsettings">
+			<phrase name="setting_phpkd_vbsas_active_desc" date="1375062875" username="PHPKD" version="4.2.100"><![CDATA[Choose whether "PHPKD - vB Spam Assassin" is active or not (global switch).]]></phrase>
+			<phrase name="setting_phpkd_vbsas_active_title" date="1375062875" username="PHPKD" version="4.2.100"><![CDATA[Product Active]]></phrase>
+			<phrase name="setting_phpkd_vbsas_ban_desc" date="1377014494" username="PHPKD" version="4.2.100"><![CDATA[Would you like to ban spammers rather than deleting them? This option only affects user account record, but all other postings by the spammer will be permanently deleted.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_ban_title" date="1377014494" username="PHPKD" version="4.2.100"><![CDATA[Ban Spammers Rather Than Deleting Them?]]></phrase>
+			<phrase name="setting_phpkd_vbsas_banoptions_desc" date="1377026206" username="PHPKD" version="4.2.100"><![CDATA[In addition to deleting or banning spammer account, you can ban used email address and/or IP address globally.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_banoptions_title" date="1377026206" username="PHPKD" version="4.2.100"><![CDATA[Ban Options]]></phrase>
+			<phrase name="setting_phpkd_vbsas_bantitle_desc" date="1377014579" username="PHPKD" version="4.2.100"><![CDATA[If you have chosen to ban spammers rather than deleting them, then enter a user title to be used for their banned accounts.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_bantitle_title" date="1377014579" username="PHPKD" version="4.2.100"><![CDATA[Banned Usertitle]]></phrase>
+			<phrase name="setting_phpkd_vbsas_banugid_desc" date="1377014530" username="PHPKD" version="4.2.100"><![CDATA[If you have chosen to ban spammers rather than deleting them, then select banned usergroup from the select menu.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_banugid_title" date="1377014530" username="PHPKD" version="4.2.100"><![CDATA[Banned Usergroup]]></phrase>
+			<phrase name="setting_phpkd_vbsas_inex_usergroups_desc" date="1375701626" username="PHPKD" version="4.2.100"><![CDATA[You can include/exclude certain usergroups from being deleted as spammers by staff.<br /><br />
+Select "Include All Usergroups" to include all usergroups, or select "Include Specific Usergroups" to include only those specific usergroups -defined in the following setting-, or select "Exclude Specific Usergroups" to include all usergroups <strong>except</strong> those specific usergroups -defined in the following setting-.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_inex_usergroups_ids_desc" date="1375062781" username="PHPKD" version="4.2.100"><![CDATA[If you have chosen "Include Specific Usergroups" OR "Exclude Specific Usergroups" from the above setting, then you have to enter those specified usergroup IDs here in this setting's field. Separate usergroup IDs by normal English comma.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_inex_usergroups_ids_title" date="1375062781" username="PHPKD" version="4.2.100"><![CDATA[Included/Excluded Usergroups]]></phrase>
+			<phrase name="setting_phpkd_vbsas_inex_usergroups_title" date="1375062777" username="PHPKD" version="4.2.100"><![CDATA[Include/Exclude Usergroups]]></phrase>
+			<phrase name="setting_phpkd_vbsas_inex_users_desc" date="1375701644" username="PHPKD" version="4.2.100"><![CDATA[You can include/exclude certain users from being deleted as spammers by staff.<br /><br />
+Select "Include All Users" to include all users, or select "Include Specific Users" to include only those specific users -defined in the following setting-, or select "Exclude Specific Users" to include all users <strong>except</strong> those specific users -defined in the following setting-.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_inex_users_ids_desc" date="1375062734" username="PHPKD" version="4.2.100"><![CDATA[If you have chosen "Include Specific Users" OR "Exclude Specific Users" from the above setting, then you have to enter those specified user IDs here in this setting's field. Separate user IDs by normal English comma.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_inex_users_ids_title" date="1375062734" username="PHPKD" version="4.2.100"><![CDATA[Included/Excluded Users]]></phrase>
+			<phrase name="setting_phpkd_vbsas_inex_users_title" date="1375062543" username="PHPKD" version="4.2.100"><![CDATA[Include/Exclude Users]]></phrase>
+			<phrase name="setting_phpkd_vbsas_notification_desc" date="1375716727" username="PHPKD" version="4.2.100"><![CDATA[Check appropriate notification methods applicable when there's a suspicious spam registrations or when a staff member delete suspicious spam user.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_notification_fid_desc" date="1375701672" username="PHPKD" version="4.2.100"><![CDATA[If there's any suspicious spam registrations detected, or some staff member deleted another suspicious spam user, a notification will be issued as a new thread report in the specified forum. Select the specified notification forum.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_notification_fid_title" date="1375070224" username="PHPKD" version="4.2.100"><![CDATA[Spam Notification Forum ID]]></phrase>
+			<phrase name="setting_phpkd_vbsas_notification_title" date="1375716727" username="PHPKD" version="4.2.100"><![CDATA[Registration Spam Notification]]></phrase>
+			<phrase name="setting_phpkd_vbsas_notified_desc" date="1375701729" username="PHPKD" version="4.2.100"><![CDATA[If there's any suspicious spam registrations detected, or some staff member deleted another suspicious spam user, a notification will be issued to selected staff members. Just write here staff member IDs (separated in commas).]]></phrase>
+			<phrase name="setting_phpkd_vbsas_notified_title" date="1375700084" username="PHPKD" version="4.2.100"><![CDATA[Spam Notification: Notified Staff Members]]></phrase>
+			<phrase name="setting_phpkd_vbsas_notifier_desc" date="1369405498" username="PHPKD" version="4.2.100"><![CDATA[Notifications sent as PMs, or posted in forums requires a valid staff member username to use as a sender/poster. Enter a valid staff member username with appropriate privileges here in this setting's field. Note: If this username is invalid or does not has appropriate privileges, then all "PM Notifications" & reporting posts will not work until it is corrected.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_notifier_title" date="1369405498" username="PHPKD" version="4.2.100"><![CDATA[Spam Notification: Staff Handler]]></phrase>
+			<phrase name="setting_phpkd_vbsas_puids_desc" date="1375701718" username="PHPKD" version="4.2.100"><![CDATA[Select which staff usergroups that are powerful enough to delete suspicious users as spammers.]]></phrase>
+			<phrase name="setting_phpkd_vbsas_puids_title" date="1375062980" username="PHPKD" version="4.2.100"><![CDATA[Powerful Usergroup IDs]]></phrase>
+			<phrase name="setting_phpkd_vbsas_reghv_max_desc" date="1369349246" username="PHPKD" version="4.2.100" />
+			<phrase name="setting_phpkd_vbsas_reghv_max_title" date="1369349246" username="PHPKD" version="4.2.100"><![CDATA[Registration Human Verification Maximum Wait Time Period (seconds)]]></phrase>
+			<phrase name="setting_phpkd_vbsas_reghv_min_desc" date="1369349219" username="PHPKD" version="4.2.100" />
+			<phrase name="setting_phpkd_vbsas_reghv_min_title" date="1369349219" username="PHPKD" version="4.2.100"><![CDATA[Registration Human Verification Minimum Wait Time Period (seconds)]]></phrase>
+			<phrase name="setting_phpkd_vbsas_reglock_desc" date="1369349369" username="PHPKD" version="4.2.100" />
+			<phrase name="setting_phpkd_vbsas_reglock_title" date="1369349369" username="PHPKD" version="4.2.100"><![CDATA[Disable Submit Button Until Wait Time Period Pass]]></phrase>
+			<phrase name="settinggroup_phpkd_vbsas" date="1369349169" username="PHPKD" version="4.2.100"><![CDATA[PHPKD - vB Spam Assassin]]></phrase>
+		</phrasetype>
+	</phrases>
+	<options>
+		<settinggroup name="phpkd_vbsas" displayorder="6710">
+			<setting varname="phpkd_vbsas_active" displayorder="10">
+				<datatype>boolean</datatype>
+				<optioncode>yesno</optioncode>
+				<defaultvalue>1</defaultvalue>
+			</setting>
+			<setting varname="phpkd_vbsas_reghv_min" displayorder="20">
+				<datatype>posint</datatype>
+				<defaultvalue>25</defaultvalue>
+			</setting>
+			<setting varname="phpkd_vbsas_reghv_max" displayorder="30">
+				<datatype>posint</datatype>
+				<defaultvalue>45</defaultvalue>
+			</setting>
+			<setting varname="phpkd_vbsas_reglock" displayorder="40">
+				<datatype>boolean</datatype>
+				<optioncode>yesno</optioncode>
+				<defaultvalue>1</defaultvalue>
+			</setting>
+			<setting varname="phpkd_vbsas_notifier" displayorder="50">
+				<datatype>username</datatype>
+				<optioncode>username</optioncode>
+			</setting>
+			<setting varname="phpkd_vbsas_notified" displayorder="60">
+				<datatype>free</datatype>
+			</setting>
+			<setting varname="phpkd_vbsas_notification_fid" displayorder="70">
+				<datatype>number</datatype>
+				<optioncode>select:eval
+$options = construct_forum_chooser_options(1);</optioncode>
+				<defaultvalue>0</defaultvalue>
+			</setting>
+			<setting varname="phpkd_vbsas_notification" displayorder="80">
+				<datatype>bitfield</datatype>
+				<optioncode>bitfield:misc|phpkd_vbsas_notify</optioncode>
+				<defaultvalue>7</defaultvalue>
+			</setting>
+			<setting varname="phpkd_vbsas_puids" displayorder="110">
+				<datatype>free</datatype>
+				<optioncode>usergroup:9</optioncode>
+				<defaultvalue>a:3:{i:0;i:6;i:1;i:7;i:2;i:5;}</defaultvalue>
+			</setting>
+			<setting varname="phpkd_vbsas_inex_users" displayorder="120">
+				<datatype>integer</datatype>
+				<optioncode>radio:piped
+0|phpkd_vbsas_inex_users_all
+1|phpkd_vbsas_inex_users_in
+2|phpkd_vbsas_inex_users_ex</optioncode>
+				<defaultvalue>0</defaultvalue>
+			</setting>
+			<setting varname="phpkd_vbsas_inex_users_ids" displayorder="130">
+				<datatype>free</datatype>
+			</setting>
+			<setting varname="phpkd_vbsas_inex_usergroups" displayorder="140">
+				<datatype>integer</datatype>
+				<optioncode>radio:piped
+0|phpkd_vbsas_inex_usergroups_all
+1|phpkd_vbsas_inex_usergroups_in
+2|phpkd_vbsas_inex_usergroups_ex</optioncode>
+				<defaultvalue>0</defaultvalue>
+			</setting>
+			<setting varname="phpkd_vbsas_inex_usergroups_ids" displayorder="150">
+				<datatype>free</datatype>
+			</setting>
+			<setting varname="phpkd_vbsas_ban" displayorder="160">
+				<datatype>boolean</datatype>
+				<optioncode>yesno</optioncode>
+				<defaultvalue>0</defaultvalue>
+			</setting>
+			<setting varname="phpkd_vbsas_banugid" displayorder="170">
+				<datatype>integer</datatype>
+				<optioncode>usergroup</optioncode>
+				<defaultvalue>8</defaultvalue>
+			</setting>
+			<setting varname="phpkd_vbsas_bantitle" displayorder="180">
+				<datatype>free</datatype>
+			</setting>
+			<setting varname="phpkd_vbsas_banoptions" displayorder="190">
+				<datatype>bitfield</datatype>
+				<optioncode>bitfield:misc|phpkd_vbsas_banoptions</optioncode>
+				<defaultvalue>3</defaultvalue>
+			</setting>
+		</settinggroup>
+	</options>
+	<helptopics>
+	</helptopics>
+	<cronentries>
+	</cronentries>
+	<faqentries>
+	</faqentries>
+	<navigation>
+	</navigation>
+</product>
