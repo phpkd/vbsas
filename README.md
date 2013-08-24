@@ -131,7 +131,7 @@ Help with:
 
 History:
 ---
-   * v4.2.100 01/08/2013 10:00 AM UTC: First initial 4.x.x public release..
+   * v4.2.100 01/08/2013 10:00 AM UTC: First initial 4.x.x public release.
 
 
 Technical Stats:
