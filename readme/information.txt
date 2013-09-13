@@ -10,12 +10,12 @@ Name:
 
 Version:
 ~~~~~~~~~
-   * 4.2.100
+   * 4.2.200
 
 
 Description:
 ~~~~~~~~~~~~~
-   * This product adds completely new level of Spam protection to your forum, just by one click you can clean the mess & delete all content posted by any Spammer (threads, posts, pictures, ..etc), human registration timer also prevents Spam registrations.
+   * This product adds completely new level of Spam protection to your forum, just by one click you can clean the mess & delete all spam content posted by any Spammer (threads, posts, ..etc), human registration timer also prevents Spam registrations.
 
 
 Thankful Partnership:
@@ -42,11 +42,14 @@ Features:
 	* Zero additional queries, only while executing process.
 	* Depends on & uses default vBulletin techniques with full compatibility.
 	* The product's code base is very solid/rich & has many possibilities to help in future development.
+	* Email pre-verification feature, you can prevent registration until email verified first by the user.
 	* Registration human verification process depends on ellapsed time through the registration (compared to random time period chosen from a range determined via AdminCP).
-	* With just only one click, you can delete all traces of any spammer: (user will permanently deleted. This deletion process includes all posted of data: Threads, Posts, Attachments, Calendar Events, Albums, Pictures, Social Groups, Group Discussions, Group Pictures, Announcements, Private Messages, Blogs, Blog Posts, Blog Comments, Visitor Messages, and All Other Traces [Active Sessions, User Notes, Infractions, CP Logs, Group Memberships]), and optionaly (according to product's settings) Ban IP(s), Ban Email(s).)
+	* With just only one click, you can delete all traces of any spammer: select which data should be deleted (Post Data: Threads, Posts, Polls, Announcements and Subscriptions / Social Data: Social Groups, Picture Albums, Picture Comments and Visitor Messages / Calendar Data: Calendar Events, Calendar Moderation, Event Reminders and Event Subscriptions / Third Party Data: Any third party data related to this spammer in other software like Blogs & Others! / Delete/Ban User Account: Ban/Delete User Account, PMs, Sessions, Logs, Permissions, Relationships And Profile Assets & Traces) and optionaly (according to product's settings) Ban IP(s), Ban Email(s), Force Soft Deletion For Applicable Data Types, Send Email Notification To Spammer.)
+	* Report actions to staff via private messages and/or new thread in specified forum.
 
    |- Specific Features:-
-	* Active Switch
+	* Product Active
+	* Registration Human Verification Countdown Timer Active
 	* Registration Human Verification Minimum Wait Time Period (seconds)
 	* Registration Human Verification Maximum Wait Time Period (seconds)
 	* Disable Submit Button Until Wait Time Period Pass
@@ -56,11 +59,17 @@ Features:
 	* Registration Spam Notification
 	* Powerful Usergroup IDs
 	* Include/Exclude Users
+	* Included/Excluded Users IDs
 	* Include/Exclude Usergroups
-	* Ban Spammers Rather Than Deleting Them?
+	* Included/Excluded Usergroups IDs
 	* Banned Usergroup
 	* Banned Usertitle
-	* Ban Options
+	* Ban Options (IP Address - Email)
+	* Spam Registration Failure Action (Failure MSG - Failure Redirect)
+	* Spam Registration Failure MSG
+	* Spam Registration Failure Redirect
+	* Email Pre-Verification: Active
+	* Email Pre-Verification: Code Expiration
 
 
 Installation Procedure:
@@ -133,23 +142,24 @@ Help with:
 History:
 ~~~~~~~~~
    * v4.2.100 01/08/2013 10:00 AM UTC: First initial 4.x.x public release.
+   * v4.2.100 13/09/2013 10:00 AM UTC: Second Generation - Featured public release.
 
 
 Technical Stats:
 ~~~~~~~~~~~~~~~~~
-   * New Plugins: 9
-   * New Phrases: 62
-   * New Templates: 3
+   * New Plugins: 12
+   * New Phrases: 103
+   * New Templates: 5
    * Manual Template changes: 0
-   * Auto Template changes: 3
+   * Auto Template changes: 5
    * New Files: 3
    * Manual File Changes: 0
-   * New vBulletin Settings: 17
+   * New vBulletin Settings: 22
    * New Usergroup Permissions: 0
    * New Moderator Permissions: 0
    * New Administrator Permissions: 0
    * New Forum Options: 0
-   * New DB Tables: 0
+   * New DB Tables: 1
    * DB Alterations: 0
    * New Cronjobs: 0
    * New FAQ Items: 0

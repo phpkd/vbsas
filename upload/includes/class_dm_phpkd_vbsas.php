@@ -162,7 +162,7 @@ class vB_DataManager_PHPKD_VBSAS extends vB_DataManager
 	* @param	vB_Registry	Instance of the vBulletin data registry object - expected to have the database object as one of its $this->db member.
 	* @param	integer		One of the ERRTYPE_x constants
 	*/
-	function vB_DataManager_PHPKD_VBSAS(&$registry, $errtype = ERRTYPE_STANDARD)
+	function vB_DataManager_PHPKD_VBSAS(&$registry, $errtype = ERRTYPE_SILENT)
 	{
 		parent::vB_DataManager($registry, $errtype);
 	}
@@ -172,7 +172,7 @@ class vB_DataManager_PHPKD_VBSAS extends vB_DataManager
 	*
 	* @return	mixed	The number of affected rows
 	*/
-	function delete($doquery = true, $ban = false)
+	function delete($doquery = true)
 	{
 		if (!$this->existing['userid'])
 		{
@@ -191,322 +191,438 @@ class vB_DataManager_PHPKD_VBSAS extends vB_DataManager
 			return false;
 		}
 
-		$this->registry->db->query_write("
-			UPDATE " . TABLE_PREFIX . "post SET
-				username = '" . $this->registry->db->escape_string($this->existing['username']) . "',
-				userid = 0
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			UPDATE " . TABLE_PREFIX . "groupmessage SET
-				postusername = '" . $this->registry->db->escape_string($this->existing['username']) . "',
-				postuserid = 0
-			WHERE postuserid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			UPDATE " . TABLE_PREFIX . "discussion SET
-				lastposter = '" . $this->registry->db->escape_string($this->existing['username']) . "',
-				lastposterid = 0
-			WHERE lastposterid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			UPDATE " . TABLE_PREFIX . "visitormessage SET
-				postusername = '" . $this->registry->db->escape_string($this->existing['username']) . "',
-				postuserid = 0
-			WHERE postuserid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "visitormessage
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			UPDATE " . TABLE_PREFIX . "usernote SET
-				username = '" . $this->registry->db->escape_string($this->existing['username']) . "',
-				posterid = 0
-			WHERE posterid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "usernote
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "access
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "event
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "customavatar
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		@unlink($this->registry->options['avatarpath'] . '/avatar' . $this->existing['userid'] . '_' . $this->existing['avatarrevision'] . '.gif');
 
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "customprofilepic
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		@unlink($this->registry->options['profilepicpath'] . '/profilepic' . $this->existing['userid'] . '_' . $this->existing['profilepicrevision'] . '.gif');
-
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "sigpic
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		@unlink($this->registry->options['sigpicpath'] . '/sigpic' . $this->existing['userid'] . '_' . $this->existing['sigpicrevision'] . '.gif');
-
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "moderator
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "reputation
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "subscribeforum
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "subscribethread
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "subscribeevent
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "subscriptionlog
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "session
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "userban
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "usergrouprequest
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "announcementread
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "infraction
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "groupread
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "discussionread
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "subscribediscussion
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "subscribegroup
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "profileblockprivacy
-			WHERE userid = " . $this->existing['userid'] . "
-		");
-
-		$this->registry->db->query_write("
-			UPDATE " . TABLE_PREFIX . "activitystream
-			SET
-				userid = 0
-			WHERE
-				userid = " . $this->existing['userid'] . "
-		");
-
-		$pendingfriends = array();
-		$currentfriends = array();
-
-		$friendlist = $this->registry->db->query_read("
-			SELECT relationid, friend
-			FROM " . TABLE_PREFIX . "userlist
-			WHERE userid = " . $this->existing['userid'] . "
-				AND type = 'buddy'
-				AND friend IN('pending','yes')
-		");
-
-		while ($friend = $this->registry->db->fetch_array($friendlist))
+		// Delete Social Data (Socialgroups, Picture Albums, Picture Comments, Visitor Messages and related memberships & subscriptions)
+		if ($this->registry->GPC['del_social'] || $this->registry->GPC['del_account'] == 1)
 		{
-			if ($friend['friend'] == 'yes')
+			// Discussions (No DM since there is NO userid in the 'discussion' table)
+			$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "discussion SET lastposter = '" . $this->registry->db->escape_string($this->existing['username']) . "', lastposterid = 0 WHERE lastposterid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "discussionread WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "subscribediscussion WHERE userid = " . $this->existing['userid']);
+
+			// Visitor Messages
+			require_once(DIR . '/includes/functions_visitormessage.php');
+			$visitormessagesql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "visitormessage AS visitormessage WHERE visitormessage.userid = " . $this->existing['userid']);
+			while ($visitormessageinfo = $this->registry->db->fetch_array($visitormessagesql))
 			{
-				$currentfriends[] = $friend['relationid'];
+				$visitormessagedm =& datamanager_init('VisitorMessage', $this->registry, ERRTYPE_SILENT);
+				$visitormessagedm->set_existing($visitormessageinfo);
+				$visitormessagedm->set_info('hard_delete', !$this->registry->GPC['softdeletion']);
+				$visitormessagedm->set_info('reason', $this->registry->GPC['deletereason']);
+				$visitormessagedm->delete();
+				unset($visitormessagedm);
 			}
-			else
+
+			// Socialgroup Subscriptions
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "groupread WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "subscribegroup WHERE userid = " . $this->existing['userid']);
+
+			// Socialgoups
+			$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "socialgroup SET transferowner = 0 WHERE transferowner = " . $this->existing['userid']);
+			$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "socialgroup SET lastposter = '" . $this->registry->db->escape_string($phpkd_vbsas['username']) . "', lastposterid = 0 WHERE lastposterid = " . $this->existing['userid']);
+
+			$groups = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "socialgroup WHERE creatoruserid = " . $this->existing['userid']);
+
+			$groupsowned = array();
+			while ($group = $this->registry->db->fetch_array($groups))
 			{
-				$pendingfriends[] = $friend['relationid'];
+				$groupsowned[] = $group['groupid'];
 			}
-		}
+			$this->registry->db->free_result($groups);
 
-		if (!empty($pendingfriends))
-		{
-			$this->registry->db->query_write("
-				UPDATE " . TABLE_PREFIX . "user
-				SET friendreqcount = IF(friendreqcount > 0, friendreqcount - 1, 0)
-				WHERE userid IN (" . implode(", ", $pendingfriends) . ")
-			");
-		}
-
-		if (!empty($currentfriends))
-		{
-			$this->registry->db->query_write("
-				UPDATE " . TABLE_PREFIX . "user
-				SET friendcount = IF(friendcount > 0, friendcount - 1, 0)
-				WHERE userid IN (" . implode(", ", $currentfriends) . ")
-			");
-		}
-
-		$this->registry->db->query_write("
-			DELETE FROM " . TABLE_PREFIX . "userlist
-			WHERE userid = " . $this->existing['userid'] . " OR relationid = " . $this->existing['userid']
-		);
-
-		$admindm =& datamanager_init('Admin', $this->registry, ERRTYPE_SILENT);
-		$admindm->set_existing($this->existing);
-		$admindm->delete();
-		unset($admindm);
-
-		$groups = $this->registry->db->query_read("
-			SELECT *
-			FROM " . TABLE_PREFIX . "socialgroup
-			WHERE creatoruserid = " . $this->existing['userid']
-		);
-
-		$groupsowned = array();
-
-		while ($group = $this->registry->db->fetch_array($groups))
-		{
-			$groupsowned[] = $group['groupid'];
-		}
-		$this->registry->db->free_result($groups);
-
-		if (!empty($groupsowned))
-		{
-			require_once(DIR . '/includes/functions_socialgroup.php');
-			foreach($groupsowned AS $groupowned)
+			if (!empty($groupsowned))
 			{
-				$group = fetch_socialgroupinfo($groupowned);
-				if (!empty($group))
+				require_once(DIR . '/includes/functions_socialgroup.php');
+
+				foreach($groupsowned AS $groupowned)
 				{
-					// dm will have problem if the group is invalid, and in all honesty, at this situation,
-					// if the group is no longer present, then we don't need to worry about it anymore.
-					$socialgroupdm = datamanager_init('SocialGroup', $this->registry, ERRTYPE_SILENT);
-					$socialgroupdm->set_existing($group);
-					$socialgroupdm->delete();
+					$group = fetch_socialgroupinfo($groupowned);
+					if (!empty($group))
+					{
+						// dm will have problem if the group is invalid, and in all honesty, at this situation,
+						// if the group is no longer present, then we don't need to worry about it anymore.
+						$socialgroupdm = datamanager_init('SocialGroup', $this->registry, ERRTYPE_SILENT);
+						$socialgroupdm->set_existing($group);
+						$socialgroupdm->delete();
+					}
+				}
+			}
+
+			// Socialgroup Memberships
+			$groupmemberships = $this->registry->db->query_read("
+				SELECT socialgroup.*
+				FROM " . TABLE_PREFIX . "socialgroupmember AS socialgroupmember
+				INNER JOIN " . TABLE_PREFIX . "socialgroup AS socialgroup ON (socialgroup.groupid = socialgroupmember.groupid)
+				WHERE socialgroupmember.userid = " . $this->existing['userid']
+			);
+
+			$socialgroups = array();
+			while ($groupmembership = $this->registry->db->fetch_array($groupmemberships))
+			{
+				$socialgroups["$groupmembership[groupid]"] = $groupmembership;
+			}
+
+			if (!empty($socialgroups))
+			{
+				$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "socialgroupmember WHERE userid = "  . $this->existing['userid']);
+
+				foreach ($socialgroups AS $group)
+				{
+					$groupdm =& datamanager_init('SocialGroup', $this->registry, ERRTYPE_SILENT);
+					$groupdm->set_existing($group);
+					$groupdm->rebuild_membercounts();
+					$groupdm->rebuild_picturecount();
+					$groupdm->save();
+
+					list($pendingcountforowner) = $this->registry->db->query_first("SELECT SUM(moderatedmembers) FROM " . TABLE_PREFIX . "socialgroup WHERE creatoruserid = " . $group['creatoruserid'], DBARRAY_NUM);
+					$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "user SET socgroupreqcount = " . intval($pendingcountforowner) . " WHERE userid = " . $group['creatoruserid']);
+				}
+
+				unset($groupdm);
+			}
+
+			// Socialgroup Pictures
+			$types = vB_Types::instance();
+			$picture_sql = $this->registry->db->query_read("
+				SELECT a.attachmentid, a.filedataid, a.userid
+				FROM " . TABLE_PREFIX . "attachment AS a
+				WHERE a.userid = " . $this->existing['userid'] . " AND a.contenttypeid IN (" . intval($types->getContentTypeID('vBForum_SocialGroup')) . "," . intval($types->getContentTypeID('vBForum_Album')) . ")
+			");
+
+			$attachdm =& datamanager_init('Attachment', $this->registry, ERRTYPE_SILENT, 'attachment');
+			while ($picture = $this->registry->db->fetch_array($picture_sql))
+			{
+				$attachdm->set_existing($picture);
+				$attachdm->delete();
+			}
+
+			// Albums
+			$albumsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "album AS album WHERE album.userid = " . $this->existing['userid']);
+			while ($albuminfo = $this->registry->db->fetch_array($albumsql))
+			{
+				$albumdata =& datamanager_init('Album', $this->registry, ERRTYPE_SILENT);
+				$albumdata->set_existing($albuminfo);
+				$albumdata->delete();
+				unset($albumdata);
+			}
+
+			// PictureComment
+			$picturecommentsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "picturecomment AS picturecomment WHERE picturecomment.userid = " . $this->existing['userid']);
+			while ($picturecommentinfo = $this->registry->db->fetch_array($picturecommentsql))
+			{
+				$picturecommentdata =& datamanager_init('PictureComment', $this->registry, ERRTYPE_SILENT);
+				$picturecommentdata->set_existing($picturecommentinfo);
+				$picturecommentdata->set_info('hard_delete', !$this->registry->GPC['softdeletion']);
+				$picturecommentdata->set_info('reason', $this->registry->GPC['deletereason']);
+				$picturecommentdata->delete();
+				unset($picturecommentdata);
+			}
+
+			if ($this->registry->GPC['del_social'])
+			{
+				// Visitor Messages
+				require_once(DIR . '/includes/functions_visitormessage.php');
+				$visitormessagesql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "visitormessage AS visitormessage WHERE visitormessage.postuserid = " . $this->existing['userid']);
+				while ($visitormessageinfo = $this->registry->db->fetch_array($visitormessagesql))
+				{
+					$visitormessagedm =& datamanager_init('VisitorMessage', $this->registry, ERRTYPE_SILENT);
+					$visitormessagedm->set_existing($visitormessageinfo);
+					$visitormessagedm->set_info('hard_delete', !$this->registry->GPC['softdeletion']);
+					$visitormessagedm->set_info('reason', $this->registry->GPC['deletereason']);
+					$visitormessagedm->delete();
+					unset($visitormessagedm);
+				}
+
+				// Socialgoup Messages
+				$groupmessagesql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "groupmessage AS groupmessage WHERE groupmessage.postuserid = " . $this->existing['userid']);
+				while ($groupmessageinfo = $this->registry->db->fetch_array($groupmessagesql))
+				{
+					$groupmessagedm =& datamanager_init('GroupMessage', $this->registry, ERRTYPE_SILENT);
+					$groupmessagedm->set_existing($groupmessageinfo);
+					$groupmessagedm->set_info('hard_delete', !$this->registry->GPC['softdeletion']);
+					$groupmessagedm->set_info('reason', $this->registry->GPC['deletereason']);
+					$groupmessagedm->delete();
+					unset($groupmessagedm);
+				}
+
+				// PictureComment
+				$picturecommentsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "picturecomment AS picturecomment WHERE picturecomment.postuserid = " . $this->existing['userid']);
+				while ($picturecommentinfo = $this->registry->db->fetch_array($picturecommentsql))
+				{
+					$picturecommentdata =& datamanager_init('PictureComment', $this->registry, ERRTYPE_SILENT);
+					$picturecommentdata->set_existing($picturecommentinfo);
+					$picturecommentdata->set_info('hard_delete', !$this->registry->GPC['softdeletion']);
+					$picturecommentdata->set_info('reason', $this->registry->GPC['deletereason']);
+					$picturecommentdata->delete();
+					unset($picturecommentdata);
+				}
+			}
+
+			if ($this->registry->GPC['del_account'] == 1)
+			{
+				// Visitor Messages
+				$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "visitormessage SET postuserid = 0 WHERE postuserid = " . $this->existing['userid']);
+
+				// Socialgoup Messages
+				$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "groupmessage SET postuserid = 0 WHERE postuserid = " . $this->existing['userid']);
+
+				// Socialgoup Messages
+				$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "picturecomment SET postuserid = 0 WHERE postuserid = " . $this->existing['userid']);
+			}
+		}
+
+
+		// Delete Calendar Data
+		if ($this->registry->GPC['del_calendar'] || $this->registry->GPC['del_account'] == 1)
+		{
+			$eventsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "event AS event WHERE event.userid = " . $this->existing['userid']);
+			while ($eventinfo = $this->registry->db->fetch_array($eventsql))
+			{
+				$eventdata =& datamanager_init('Event', $this->registry, ERRTYPE_SILENT);
+				$eventdata->set_existing($eventinfo);
+				$eventdata->delete();
+				unset($eventdata);
+			}
+
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "reminder WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "calendarmoderator WHERE userid = " . $this->existing['userid']);
+		}
+
+
+		// Delete Threads, Posts, Polls and related subscriptions
+		if ($this->registry->GPC['del_threadpost'] || $this->registry->GPC['del_account'] == 1)
+		{
+			// Subscriptions
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "subscribeforum WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "subscribethread WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "subscriptionlog WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "threadread WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "forumread WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "threadrate WHERE userid = " . $this->existing['userid']);
+
+			// PollVote
+			$pollvotesql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "pollvote AS pollvote WHERE pollvote.userid = " . $this->existing['userid']);
+			while ($pollvoteinfo = $this->registry->db->fetch_array($pollvotesql))
+			{
+				$pollvotedata =& datamanager_init('PollVote', $this->registry, ERRTYPE_SILENT);
+				$pollvotedata->set_existing($pollvoteinfo);
+				$pollvotedata->delete();
+				unset($pollvotedata);
+			}
+
+			// Common data
+			$threadarr = array();
+			$forumarr = array();
+
+			if ($this->registry->GPC['del_threadpost'])
+			{
+				// Announcements
+				$announcementsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "announcement AS announcement WHERE announcement.userid = " . $this->existing['userid']);
+				while ($announcementinfo = $this->registry->db->fetch_array($announcementsql))
+				{
+					$anncdata =& datamanager_init('Announcement', $this->registry, ERRTYPE_SILENT);
+					$anncdata->set_existing($announcementinfo);
+					$anncdata->delete();
+					unset($anncdata);
+				}
+
+				// Posts
+				$postsql = $this->registry->db->query_read("SELECT post.*, thread.forumid FROM " . TABLE_PREFIX . "post AS post LEFT JOIN " . TABLE_PREFIX . "thread AS thread USING (threadid) WHERE post.userid = " . $this->existing['userid']);
+				while ($postinfo = $this->registry->db->fetch_array($postsql))
+				{
+					$postdata =& datamanager_init('Post', $this->registry, ERRTYPE_SILENT, 'threadpost');
+					$postdata->set_existing($postinfo);
+					$postdata->delete(true, $postinfo['threadid'], !$this->registry->GPC['softdeletion'], array('userid' => $this->registry->userinfo['userid'], 'username' => $this->registry->userinfo['username'], 'reason' => $this->registry->GPC['deletereason']));
+					unset($postdata);
+
+					$threadarr[] = $postinfo['threadid'];
+					$forumarr[] = $postinfo['forumid'];
+				}
+
+				// Threads
+				$threadsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "thread AS thread WHERE thread.postuserid = " . $this->existing['userid']);
+				while ($threadinfo = $this->registry->db->fetch_array($threadsql))
+				{
+					$threaddata =& datamanager_init('Thread', $this->registry, ERRTYPE_SILENT, 'threadpost');
+					$threaddata->set_existing($threadinfo);
+					$threaddata->delete(true, !$this->registry->GPC['softdeletion'], array('userid' => $this->registry->userinfo['userid'], 'username' => $this->registry->userinfo['username'], 'reason' => $this->registry->GPC['deletereason']));
+					unset($threaddata);
+
+					$forumarr[] = $threadinfo['forumid'];
+				}
+			}
+
+			if ($this->registry->GPC['del_account'] == 1)
+			{
+				// Announcements
+				$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "announcement SET userid = 0 WHERE userid = " . $this->existing['userid']);
+
+				// Posts
+				$postsql = $this->registry->db->query_read("SELECT post.*, thread.forumid FROM " . TABLE_PREFIX . "post AS post LEFT JOIN " . TABLE_PREFIX . "thread AS thread USING (threadid) WHERE post.userid = " . $this->existing['userid']);
+				while ($postinfo = $this->registry->db->fetch_array($postsql))
+				{
+					$threadarr[] = $postinfo['threadid'];
+					$forumarr[] = $postinfo['forumid'];
+				}
+				$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "post SET userid = 0 WHERE userid = " . $this->existing['userid']);
+
+				// Threads
+				$threadsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "thread AS thread WHERE thread.postuserid = " . $this->existing['userid']);
+				while ($threadinfo = $this->registry->db->fetch_array($threadsql))
+				{
+					$forumarr[] = $threadinfo['forumid'];
+				}
+				$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "thread SET postuserid = 0 WHERE postuserid = " . $this->existing['userid']);
+			}
+
+			if (!empty($threadarr))
+			{
+				foreach ($threadarr as $threadid)
+				{
+					build_thread_counters($threadid);
+				}
+			}
+
+			if (!empty($forumarr))
+			{
+				foreach ($forumarr as $forumid)
+				{
+					build_forum_counters($forumid);
 				}
 			}
 		}
 
-		$groupmemberships = $this->registry->db->query_read("
-			SELECT socialgroup.*
-			FROM " . TABLE_PREFIX . "socialgroupmember AS socialgroupmember
-			INNER JOIN " . TABLE_PREFIX . "socialgroup AS socialgroup ON
-				(socialgroup.groupid = socialgroupmember.groupid)
-			WHERE socialgroupmember.userid = " . $this->existing['userid']
-		);
 
-		$socialgroups = array();
-		while ($groupmembership = $this->registry->db->fetch_array($groupmemberships))
+
+		// Delete User Profile Data
+		if ($this->registry->GPC['del_account'] == 1)
 		{
-			$socialgroups["$groupmembership[groupid]"] = $groupmembership;
-		}
+			// Traces
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "access WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "session WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "cpsession WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "infraction WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "reputation WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "profileblockprivacy WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "activitystream WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "autosave WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "customprofile WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "ipdata WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "adminlog WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "moderator WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "moderatorlog WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "deletionlog WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "noticedismissed WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "passwordhistory WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "usergrouprequest WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "pmthrottle WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "profilevisitor WHERE userid = " . $this->existing['userid'] . " OR visitorid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "searchcore WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "searchgroup WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "searchlog WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "sigparsed WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "skimlinks WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "tachyforumcounter WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "tachyforumpost WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "tachythreadcounter WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "tachythreadpost WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "tachythreadpost WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "useractivation WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "userban WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "userchangelog WHERE userid = " . $this->existing['userid'] . " OR adminid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "usercss WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "usercsscache WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "usergroupleader WHERE userid = " . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "usernote WHERE userid = " . $this->existing['userid'] . " OR posterid = " . $this->existing['userid']);
 
-		$types = vB_Types::instance();
 
-		$picture_sql = $this->registry->db->query_read("
-			SELECT a.attachmentid, a.filedataid, a.userid
-			FROM " . TABLE_PREFIX . "attachment AS a
-			WHERE
-				a.userid = " . $this->existing['userid'] . "
-					AND
-				a.contenttypeid IN (" . intval($types->getContentTypeID('vBForum_SocialGroup')) . "," . intval($types->getContentTypeID('vBForum_Album')) . ")
-		");
-		$pictures = array();
+			// Custom Profile Pictures
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "customavatar WHERE userid = " . $this->existing['userid']);
+			@unlink($this->registry->options['avatarpath'] . '/avatar' . $this->existing['userid'] . '_' . $this->existing['avatarrevision'] . '.gif');
 
-		$attachdm =& datamanager_init('Attachment', $this->registry, ERRTYPE_SILENT, 'attachment');
-		while ($picture = $this->registry->db->fetch_array($picture_sql))
-		{
-			$attachdm->set_existing($picture);
-			$attachdm->delete();
-		}
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "customprofilepic WHERE userid = " . $this->existing['userid']);
+			@unlink($this->registry->options['profilepicpath'] . '/profilepic' . $this->existing['userid'] . '_' . $this->existing['profilepicrevision'] . '.gif');
 
-		if (!empty($socialgroups))
-		{
-			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "socialgroupmember WHERE userid = "  . $this->existing['userid']);
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "sigpic WHERE userid = " . $this->existing['userid']);
+			@unlink($this->registry->options['sigpicpath'] . '/sigpic' . $this->existing['userid'] . '_' . $this->existing['sigpicrevision'] . '.gif');
 
-			foreach ($socialgroups AS $group)
+
+			// Admin Permissions
+			$admindm =& datamanager_init('Admin', $this->registry, ERRTYPE_SILENT);
+			$admindm->set_existing($this->existing);
+			$admindm->delete();
+			unset($admindm);
+
+
+			// Delete Infraction
+			$infractionsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "infraction AS infraction WHERE infraction.userid = " . $this->existing['userid']);
+			while ($infractioninfo = $this->registry->db->fetch_array($infractionsql))
 			{
-				$groupdm =& datamanager_init('SocialGroup', $this->registry, ERRTYPE_STANDARD);
-				$groupdm->set_existing($group);
-				$groupdm->rebuild_membercounts();
-				$groupdm->rebuild_picturecount();
-				$groupdm->save();
-
-				list($pendingcountforowner) = $this->registry->db->query_first("
-					SELECT SUM(moderatedmembers) FROM " . TABLE_PREFIX . "socialgroup
-					WHERE creatoruserid = " . $group['creatoruserid']
-				, DBARRAY_NUM);
-
-				$this->registry->db->query_write("
-					UPDATE " . TABLE_PREFIX . "user
-					SET socgroupreqcount = " . intval($pendingcountforowner) . "
-					WHERE userid = " . $group['creatoruserid']
-				);
+				$infractiondata =& datamanager_init('Infraction', $this->registry, ERRTYPE_SILENT);
+				$infractiondata->set_existing($infractioninfo);
+				$infractiondata->delete();
+				unset($infractiondata);
 			}
 
-			unset($groupdm);
-		}
 
-		$this->registry->db->query_write("
-			UPDATE " . TABLE_PREFIX . "socialgroup
-			SET transferowner = 0
-			WHERE transferowner = " . $this->existing['userid']
-		);
+			// Friendship Relations
+			$pendingfriends = array();
+			$currentfriends = array();
 
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "album WHERE userid = " . $this->existing['userid']);
+			$friendlist = $this->registry->db->query_read("
+				SELECT relationid, friend
+				FROM " . TABLE_PREFIX . "userlist
+				WHERE userid = " . $this->existing['userid'] . "
+					AND type = 'buddy'
+					AND friend IN('pending','yes')
+			");
 
-		$this->registry->db->query_write("
-			UPDATE " . TABLE_PREFIX . "picturecomment SET
-				postusername = '" . $this->registry->db->escape_string($this->existing['username']) . "',
-				postuserid = 0
-			WHERE postuserid = " . $this->existing['userid'] . "
-		");
+			while ($friend = $this->registry->db->fetch_array($friendlist))
+			{
+				if ($friend['friend'] == 'yes')
+				{
+					$currentfriends[] = $friend['relationid'];
+				}
+				else
+				{
+					$pendingfriends[] = $friend['relationid'];
+				}
+			}
 
-		require_once(DIR . '/includes/adminfunctions.php');
-		delete_user_pms($this->existing['userid'], false);
+			if (!empty($pendingfriends))
+			{
+				$this->registry->db->query_write("
+					UPDATE " . TABLE_PREFIX . "user
+					SET friendreqcount = IF(friendreqcount > 0, friendreqcount - 1, 0)
+					WHERE userid IN (" . implode(", ", $pendingfriends) . ")
+				");
+			}
 
-		require_once(DIR . '/includes/functions_databuild.php');
+			if (!empty($currentfriends))
+			{
+				$this->registry->db->query_write("
+					UPDATE " . TABLE_PREFIX . "user
+					SET friendcount = IF(friendcount > 0, friendcount - 1, 0)
+					WHERE userid IN (" . implode(", ", $currentfriends) . ")
+				");
+			}
 
-		if (!$ban)
-		{
+			$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "userlist WHERE userid = " . $this->existing['userid'] . " OR relationid = " . $this->existing['userid']);
+
+
+			// Private Messages
+			require_once(DIR . '/includes/adminfunctions.php');
+			delete_user_pms($this->existing['userid'], false);
+
+
+			// User Profile
 			if ($this->db_delete(TABLE_PREFIX, 'user', $this->condition, $doquery))
 			{
 				$this->db_delete(TABLE_PREFIX, 'userfield', $this->condition, $doquery);
 				$this->db_delete(TABLE_PREFIX, 'usertextfield', $this->condition, $doquery);
 			}
 		}
-		else
+		else if ($this->registry->GPC['del_account'] == 2)
 		{
 			$this->registry->db->query_write("
 				INSERT INTO " . TABLE_PREFIX . "userban (userid, usergroupid, displaygroupid, customtitle, usertitle, adminid, bandate, liftdate, reason)
@@ -527,126 +643,14 @@ class vB_DataManager_PHPKD_VBSAS extends vB_DataManager
 			unset($userdm);
 		}
 
-		// Delete Album
-		$albumsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "album AS album WHERE album.userid = " . $this->existing['userid']);
-		while ($albuminfo = $this->registry->db->fetch_array($albumsql))
-		{
-			$albumdata =& datamanager_init('Album', $this->registry, ERRTYPE_SILENT);
-			$albumdata->set_existing($albuminfo);
-			$albumdata->delete();
-			unset($albumdata);
-		}
-
-		// Delete Announcement
-		$announcementsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "announcement AS announcement WHERE announcement.userid = " . $this->existing['userid']);
-		while ($announcementinfo = $this->registry->db->fetch_array($announcementsql))
-		{
-			$anncdata =& datamanager_init('Announcement', $this->registry, ERRTYPE_SILENT);
-			$anncdata->set_existing($announcementinfo);
-			$anncdata->delete();
-			unset($albumdata);
-		}
-
-		// Delete Infraction
-		$infractionsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "infraction AS infraction WHERE infraction.userid = " . $this->existing['userid']);
-		while ($infractioninfo = $this->registry->db->fetch_array($infractionsql))
-		{
-			$infractiondata =& datamanager_init('Infraction', $this->registry, ERRTYPE_STANDARD);
-			$infractiondata->set_existing($infractioninfo);
-			$infractiondata->delete();
-			unset($infractiondata);
-		}
-
-		// Delete PictureComment
-		$picturecommentsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "picturecomment AS picturecomment WHERE picturecomment.userid = " . $this->existing['userid']);
-		while ($picturecommentinfo = $this->registry->db->fetch_array($picturecommentsql))
-		{
-			$picturecommentdata =& datamanager_init('PictureComment', $this->registry, ERRTYPE_SILENT);
-			$picturecommentdata->set_existing($picturecommentinfo);
-			$picturecommentdata->set_info('hard_delete', true);
-			$picturecommentdata->set_info('reason', $this->registry->GPC['deletereason']);
-			$picturecommentdata->delete();
-			unset($picturecommentdata);
-		}
-
-		// Delete PollVote
-		$pollvotesql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "pollvote AS pollvote WHERE pollvote.userid = " . $this->existing['userid']);
-		while ($pollvoteinfo = $this->registry->db->fetch_array($pollvotesql))
-		{
-			$pollvotedata =& datamanager_init('PollVote', $this->registry, ERRTYPE_STANDARD);
-			$pollvotedata->set_existing($pollvoteinfo);
-			$pollvotedata->delete();
-			unset($pollvotedata);
-		}
-
-		// Delete Post
-		$postsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "post AS post WHERE post.userid = " . $this->existing['userid']);
-		while ($postinfo = $this->registry->db->fetch_array($postsql))
-		{
-			$postdata =& datamanager_init('Post', $this->registry, ERRTYPE_SILENT, 'threadpost');
-			$postdata->set_existing($postinfo);
-			$postdata->delete(true, $postinfo['threadid'], true, array('userid' => $this->registry->userinfo['userid'], 'username' => $this->registry->userinfo['username'], 'reason' => $this->registry->GPC['deletereason']));
-			unset($postdata);
-
-			build_thread_counters($postinfo['threadid']);
-		}
-
-		// Delete Thread
-		$threadsql = $this->registry->db->query_read("SELECT * FROM " . TABLE_PREFIX . "thread AS thread WHERE thread.postuserid = " . $this->existing['userid']);
-		while ($threadinfo = $this->registry->db->fetch_array($threadsql))
-		{
-			$threaddata =& datamanager_init('Thread', $this->registry, ERRTYPE_STANDARD, 'threadpost');
-			$threaddata->set_existing($threadinfo);
-			$threaddata->delete(true, true, array('userid' => $this->registry->userinfo['userid'], 'username' => $this->registry->userinfo['username'], 'reason' => $this->registry->GPC['deletereason']));
-			unset($threaddata);
-
-			build_forum_counters($threadinfo['forumid']);
-		}
-
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "activitystream WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "adminlog WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "autosave WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "calendarmoderator WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "cpsession WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "customprofile WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "forumread WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "groupmessage WHERE postuserid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "ipdata WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "moderatorlog WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "noticedismissed WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "passwordhistory WHERE userid = " . $this->existing['userid']);
-		// $this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "pmtext WHERE fromuserid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "pmthrottle WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "profilevisitor WHERE userid = " . $this->existing['userid'] . " OR visitorid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "reminder WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "searchcore WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "searchgroup WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "searchlog WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "sigparsed WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "skimlinks WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "tachyforumcounter WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "tachyforumpost WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "tachythreadcounter WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "tachythreadpost WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "tachythreadpost WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "threadrate WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "threadread WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "useractivation WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "userchangelog WHERE userid = " . $this->existing['userid'] . " OR adminid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "usercss WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "usercsscache WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "usergroupleader WHERE userid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "usernote WHERE userid = " . $this->existing['userid'] . " OR posterid = " . $this->existing['userid']);
-		$this->registry->db->query_write("DELETE FROM " . TABLE_PREFIX . "visitormessage WHERE userid = " . $this->existing['userid'] . " OR postuserid = " . $this->existing['userid']);
-		$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "socialgroup SET lastposter = '" . $this->registry->db->escape_string($phpkd_vbsas['username']) . "', lastposterid = 0 WHERE lastposterid = " . $this->existing['userid']);
-
+		// Ban IP Address
 		if ($this->existing['ipaddress'] && $this->registry->options['phpkd_vbsas_banoptions'] & $this->registry->bf_misc_phpkd_vbsas_banoptions['phpkd_vbsas_ip'])
 		{
 			$this->registry->db->query_write("UPDATE " . TABLE_PREFIX . "setting SET value = CONCAT(value, ' ', '" . $this->existing['ipaddress'] . "') WHERE varname = 'banip'");
 			build_options();
 		}
 
-
+		// Ban Email Address
 		if ($this->existing['email'] && $this->registry->options['phpkd_vbsas_banoptions'] & $this->registry->bf_misc_phpkd_vbsas_banoptions['phpkd_vbsas_email'])
 		{
 			$this->registry->datastore->fetch(array('banemail'));
@@ -654,8 +658,15 @@ class vB_DataManager_PHPKD_VBSAS extends vB_DataManager
 			build_options();
 		}
 
-		($hook = vBulletinHook::fetch_hook('userdata_delete')) ? eval($hook) : false;
+		if ($this->registry->GPC['del_thirdparty'])
+		{
+			// Execute any other third-party deletion processes
+			($hook = vBulletinHook::fetch_hook('userdata_delete')) ? eval($hook) : false;
+		}
 
+
+		// Re-calculate user stats
+		require_once(DIR . '/includes/functions_databuild.php');
 		build_user_statistics();
 		build_birthdays();
 	}
