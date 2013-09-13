@@ -148,7 +148,7 @@ History:
 Technical Stats:
 ~~~~~~~~~~~~~~~~~
    * New Plugins: 12
-   * New Phrases: 103
+   * New Phrases: 104
    * New Templates: 5
    * Manual Template changes: 0
    * Auto Template changes: 5
