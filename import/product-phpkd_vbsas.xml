@@ -3,7 +3,7 @@
 <product productid="phpkd_vbsas" active="1">
 	<title>PHPKD - vB Spam Assassin</title>
 	<description><![CDATA[This product adds completely new level of Spam protection to your forum, just by one click you can clean the mess & delete all content posted by any Spammer (threads, posts, pictures, ..etc), human registration timer also prevents Spam registrations.]]></description>
-	<version>4.2.200</version>
+	<version>4.2.201</version>
 	<url><![CDATA[http://www.vbulletin.org/forum/misc.php?do=producthelp&pid=phpkd_vbsas]]></url>
 	<versioncheckurl><![CDATA[http://www.vbulletin.org/forum/misc.php?do=productcheck&pid=phpkd_vbsas]]></versioncheckurl>
 	<dependencies>
@@ -174,7 +174,7 @@ $db->show_errors();]]></uninstallcode>
 				{vb:rawphrase phpkd_vbsas_memberaction}
 			</a>
 		</li>]]></template>
-		<template name="phpkd_vbsas_register" templatetype="template" date="1378979614" username="PHPKD" version="4.2.200"><![CDATA[{vb:stylevar htmldoctype}
+		<template name="phpkd_vbsas_register" templatetype="template" date="1380156359" username="PHPKD" version="4.2.201"><![CDATA[{vb:stylevar htmldoctype}
 <html xmlns="http://www.w3.org/1999/xhtml"<vb:if condition="$vboptions['enablefacebookconnect']"> xmlns:fb="http://www.facebook.com/2008/fbml"</vb:if> dir="{vb:stylevar textdirection}" lang="{vb:stylevar languagecode}"><head>
 	{vb:raw headinclude}
 	
@@ -276,6 +276,7 @@ $db->show_errors();]]></uninstallcode>
 								<div class="formcontrols profile_editor_border">
 									<div class="section" style="padding: 10px">
 										<div class="blockrow" style="background: inherit !important">
+											{vb:rawphrase phpkd_vbsas_verification_confirm}<br /><br />
 											<vb:if condition="$show['phpkd_vbsas_error']">
 												<span style="font-weight: bold">{vb:rawphrase errors_occurred_during_registration}</span>
 												<ul>
@@ -313,6 +314,7 @@ $db->show_errors();]]></uninstallcode>
 								<div class="formcontrols profile_editor_border">
 									<div class="section" style="padding: 10px">
 										<div class="blockrow" style="background: inherit !important">
+											{vb:rawphrase phpkd_vbsas_verification_confirm}<br /><br />
 											<vb:if condition="$show['phpkd_vbsas_error']">
 												<span style="font-weight: bold">{vb:rawphrase errors_occurred_during_registration}</span>
 												<ul>
@@ -947,6 +949,7 @@ else
 			$vbulletin->GPC['bypassemail'] = true;
 
 			$phpkd_vbsas_code = fetch_random_string(40);
+			$phpkd_vbsas_linkback = $vbulletin->options['bburl'] . '/register.php';
 			$vbulletin->db->query_write("REPLACE INTO " . TABLE_PREFIX . "phpkd_vbsas_confirm (`email`, `code`, `dateline`, ipaddress, `location`) VALUES ('" . $email . "', '" . $phpkd_vbsas_code . "', " . TIMENOW . ", '" . IPADDRESS . "', 0);");
 			eval(fetch_email_phrases('phpkd_vbsas_verification'));
 			vbmail($email, $subject, $message, true);
@@ -1071,7 +1074,7 @@ Your user account has been deleted as a potential spammer by [URL="$bburl/member
 
 [B]Best Regards,
 $bbtitle [/B]]]></phrase>
-			<phrase name="phpkd_vbsas_verification" date="1378970832" username="PHPKD" version="4.2.200"><![CDATA[Hello,
+			<phrase name="phpkd_vbsas_verification" date="1380156014" username="PHPKD" version="4.2.201"><![CDATA[Hello,
 
 
 This message was sent to you at your request to sign up in $vboptions[bbtitle] .
@@ -1080,6 +1083,7 @@ If you want to complete registration process, you will need to copy the followin
 
 $phpkd_vbsas_code
 
+Link-back: $phpkd_vbsas_linkback
 
 If you do not want to complete the registration, or you were not the applicant, ignore this message or delete it, and to protect your email, we will prevent the registration in $vboptions[bbtitle] using your email for 24 hours.
 
@@ -1127,6 +1131,7 @@ $vboptions[bbtitle]]]></phrase>
 			<phrase name="phpkd_vbsas_softdeletion_title" date="1378736420" username="PHPKD" version="4.2.200"><![CDATA[Soft Deletion]]></phrase>
 			<phrase name="phpkd_vbsas_userinfo_desc" date="1375224614" username="PHPKD" version="4.2.100"><![CDATA[<strong>Username:</strong> {1}, <strong>Userid:</strong> {2}, <strong>Email:</strong> {3}, <strong>Registration IP:</strong> {4}]]></phrase>
 			<phrase name="phpkd_vbsas_userinfo_title" date="1375224499" username="PHPKD" version="4.2.100"><![CDATA[User Info]]></phrase>
+			<phrase name="phpkd_vbsas_verification_confirm" date="1380156302" username="PHPKD" version="4.2.201"><![CDATA[We require that you verify your email address prior to creating an account. This way, we can verify that the email address doesn't belong to someone else, is legitimate and is not one that is temporary or disposable.]]></phrase>
 		</phrasetype>
 		<phrasetype name="Register" fieldname="register">
 			<phrase name="phpkd_vbsas_code_invalid" date="1378979406" username="PHPKD" version="4.2.200"><![CDATA[Entered verification code is invalid! To get a new verification code please click "Regenerate" button left below.]]></phrase>
